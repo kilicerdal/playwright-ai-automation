@@ -6,6 +6,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -42,3 +45,43 @@ jobs:
             test-results/junit.xml
           retention-days: 30
           if-no-files-found: warn
+
+
+      - name: Publish test intelligence metrics
+        if: always()
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+
+          source = Path("test-results/results.json")
+          if not source.exists():
+              print("No test results available; keeping previous metrics.")
+              raise SystemExit(0)
+
+          stats = json.loads(source.read_text())["stats"]
+
+          summary = {
+              "total": sum(stats[k] for k in ("expected", "unexpected", "skipped", "flaky")),
+              "passed": stats["expected"],
+              "failed": stats["unexpected"],
+              "skipped": stats["skipped"],
+              "flaky": stats["flaky"],
+              "duration": stats["duration"],
+              "updatedAt": stats["startTime"],
+              "runUrl": os.environ["RUN_URL"],
+          }
+
+          destination = Path("docs/test-metrics.json")
+          destination.parent.mkdir(exist_ok=True)
+          destination.write_text(json.dumps(summary, indent=2) + "\n")
+          PYCODE
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/test-metrics.json
+          git diff --cached --quiet || git commit -m "Update verified Playwright test metrics"
+          git push

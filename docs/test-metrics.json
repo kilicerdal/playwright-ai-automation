@@ -1,0 +1,10 @@
+{
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "skipped": 0,
+  "flaky": 0,
+  "duration": 7404.29,
+  "updatedAt": "2026-10-30T07:03:48.202Z",
+  "runUrl": "https://github.com/kilicerdal/playwright-ai-automation/actions/runs/41017692410"
+}
