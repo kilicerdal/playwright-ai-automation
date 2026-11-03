@@ -46,6 +46,10 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
+      - name: Test result summary
+        if: always()
+        run: node scripts/ci-summary.mjs test-results/results.json
+
       - name: Publish test intelligence metrics
         if: always() && github.event_name != 'pull_request'
         env:

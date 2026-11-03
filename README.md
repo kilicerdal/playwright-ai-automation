@@ -112,3 +112,7 @@ The public demo systems used here are for learning. A real enterprise framework 
 Checkout tests cover required fields, order totals, successful completion, and cancellation with cart preservation. API checks include missing resources, content types, resource identity, and rejection of malformed response contracts. JSONPlaceholder simulates writes and does not enforce realistic input validation; invalid payload checks here test the local Zod contract rather than claiming server-side rejection.
 
 See [dependency review and remaining tooling findings](docs/DEPENDENCIES.md).
+
+## CI report access
+
+Open the GitHub Actions run summary for pass, fail, flaky, and skipped execution counts. If an earlier step prevents a suite from running, the summary marks its report as not generated. Download the report artifact and open its HTML report to inspect test steps and generated failure artifacts. These execution counts are not code coverage percentages.
