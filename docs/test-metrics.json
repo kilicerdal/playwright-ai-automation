@@ -1,10 +1,10 @@
 {
-  "total": 10,
-  "passed": 10,
+  "total": 12,
+  "passed": 12,
   "failed": 0,
   "skipped": 0,
   "flaky": 0,
-  "duration": 7890.081999999999,
-  "updatedAt": "2026-11-03T15:14:43.160Z",
-  "runUrl": "https://github.com/kilicerdal/playwright-ai-automation/actions/runs/41661625226"
+  "duration": 8757.039,
+  "updatedAt": "2026-11-03T15:23:57.891Z",
+  "runUrl": "https://github.com/kilicerdal/playwright-ai-automation/actions/runs/41663263725"
 }
