@@ -23,12 +23,12 @@ A production-style learning project for modern SDET practices using **Playwright
 
 Start with these examples to see how the framework is organized:
 
-| Example | What to inspect |
-| --- | --- |
-| [Login tests](tests/ui/login.spec.ts) | UI assertions and reusable page interactions |
-| [API tests](tests/api/posts.spec.ts) | API requests and response validation |
-| [Cart workflow](tests/e2e/cart.spec.ts) | End-to-end business flow |
-| [Custom fixtures](src/fixtures/test.ts) | Shared test setup and dependencies |
+| Example                                         | What to inspect                                         |
+| ----------------------------------------------- | ------------------------------------------------------- |
+| [Login tests](tests/ui/login.spec.ts)           | UI assertions and reusable page interactions            |
+| [API tests](tests/api/posts.spec.ts)            | API requests and response validation                    |
+| [Cart workflow](tests/e2e/cart.spec.ts)         | End-to-end business flow                                |
+| [Custom fixtures](src/fixtures/test.ts)         | Shared test setup and dependencies                      |
 | [CI workflow](.github/workflows/playwright.yml) | Quality checks, browser execution, and report artifacts |
 
 More detail: [architecture](docs/architecture.md), [test strategy](docs/test-strategy.md), and [AI workflow](docs/ai-workflow.md).
