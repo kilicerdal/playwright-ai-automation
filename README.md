@@ -1,5 +1,7 @@
 # Playwright AI Automation
 
+[![Playwright Tests](https://github.com/kilicerdal/playwright-ai-automation/actions/workflows/playwright.yml/badge.svg)](https://github.com/kilicerdal/playwright-ai-automation/actions/workflows/playwright.yml)
+
 A production-style learning project for modern SDET practices using **Playwright + TypeScript**. It demonstrates UI, API, and end-to-end automation plus CI quality gates and disciplined AI-assisted engineering with Claude Code / GitHub Copilot.
 
 > AI tools help develop and review the framework; they are not required to execute tests.
@@ -17,11 +19,32 @@ A production-style learning project for modern SDET practices using **Playwright
 - Docker execution
 - Claude Code project instructions
 
+## Review the code
+
+Start with these examples to see how the framework is organized:
+
+| Example | What to inspect |
+| --- | --- |
+| [Login tests](tests/ui/login.spec.ts) | UI assertions and reusable page interactions |
+| [API tests](tests/api/posts.spec.ts) | API requests and response validation |
+| [Cart workflow](tests/e2e/cart.spec.ts) | End-to-end business flow |
+| [Custom fixtures](src/fixtures/test.ts) | Shared test setup and dependencies |
+| [CI workflow](.github/workflows/playwright.yml) | Quality checks, browser execution, and report artifacts |
+
+More detail: [architecture](docs/architecture.md), [test strategy](docs/test-strategy.md), and [AI workflow](docs/ai-workflow.md).
+
 ## Quick start
 
+Use Node.js 22, matching CI, and npm. The default targets are the public SauceDemo UI and JSONPlaceholder API, so internet access is required.
+
 ```bash
-npm install
-npx playwright install
+git clone https://github.com/kilicerdal/playwright-ai-automation.git
+cd playwright-ai-automation
+```
+
+```bash
+npm ci
+npx playwright install chromium firefox
 cp .env.example .env
 npm test
 ```
@@ -46,6 +69,12 @@ Open the latest HTML report:
 ```bash
 npm run report
 ```
+
+## CI and failure investigation
+
+The [Playwright workflow](.github/workflows/playwright.yml) runs on pushes and pull requests to `main`, and can also be started manually. It runs type checking, linting, formatting checks, and the test suite in Chromium and Firefox.
+
+When a test fails, inspect the HTML report and retained traces, screenshots, and videos. CI uploads `playwright-report` and structured JSON/JUnit results as workflow artifacts. A status badge reports the workflow result; it is not a coverage percentage.
 
 ## Structure
 
