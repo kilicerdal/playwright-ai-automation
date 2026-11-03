@@ -6,6 +6,14 @@ A production-style learning project for modern SDET practices using **Playwright
 
 > AI tools help develop and review the framework; they are not required to execute tests.
 
+## See the results
+
+![Actual Chromium and Firefox CI report](docs/images/ci-test-report.jpg)
+
+[75-second captioned walkthrough](docs/media/walkthrough.webm?raw=true) · [Download sample HTML report ZIP](docs/samples/playwright-report.zip?raw=true)
+
+This sample is from [CI run 41663263725](https://github.com/kilicerdal/playwright-ai-automation/actions/runs/41663263725): 12 executions passed across Chromium and Firefox. It is a dated snapshot, not a current coverage claim. Extract the ZIP and open `index.html` to inspect test steps. The walkthrough uses actual report screenshots, with captions and no narration.
+
 ## What it demonstrates
 
 - Playwright UI and API automation
