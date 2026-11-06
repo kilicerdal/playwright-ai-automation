@@ -7,7 +7,7 @@ if (execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim())
   throw new Error('Commit capture source first so its source pin is exact');
 const commit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const cases = [];
-for (const scenario of ['concurrent', 'changed-payload'] as const) {
+for (const scenario of ['replay', 'concurrent', 'changed-payload'] as const) {
   const db = await databaseHarness();
   try {
     const buyer = await db.login();
@@ -23,7 +23,7 @@ for (const scenario of ['concurrent', 'changed-payload'] as const) {
         : [
             await buyer.checkout(key),
             await buyer.checkout(key, {
-              name: 'Changed Synthetic Name',
+              name: scenario === 'changed-payload' ? 'Changed Synthetic Name' : 'Alex Engineer',
               address: '100 Test Avenue',
             }),
           ];
@@ -36,7 +36,11 @@ for (const scenario of ['concurrent', 'changed-payload'] as const) {
     const cart = await (await buyer.cart()).json();
     assert.deepEqual(
       scenario === 'concurrent' ? [...statuses].sort() : statuses,
-      scenario === 'concurrent' ? [200, 200, 201] : [201, 409],
+      scenario === 'concurrent'
+        ? [200, 200, 201]
+        : scenario === 'changed-payload'
+          ? [201, 409]
+          : [201, 200],
     );
     assert.equal(orders.length, 1);
     assert.equal(stock, baseline - 2);
@@ -76,5 +80,5 @@ const record = {
 await mkdir('artifacts', { recursive: true });
 await writeFile('artifacts/checkout-scenarios.json', JSON.stringify(record, null, 2) + '\n');
 console.log(
-  'Captured concurrent and changed-payload checkout: one order, stock reduced by two, empty cart.',
+  'Captured replay, concurrent and changed-payload checkout: one order, stock reduced by two, empty cart.',
 );
