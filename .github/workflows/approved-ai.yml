@@ -20,7 +20,7 @@ permissions:
   actions: read
 jobs:
   evaluate:
-    if: github.ref == 'refs/heads/main' && inputs.confirm_review
+    if: ${{ false }} # Disabled by zero-spend policy.
     environment: ai-review
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -65,7 +65,7 @@ jobs:
         run: npm run ai:review -- --approve "--hash=${REVIEW_HASH}" "--reviewer=${REVIEWER}"
       - run: npm run ai:evaluate-approved
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: ${{ false }} # Disabled by zero-spend policy.
         with:
           name: reviewed-ai-evaluation
           path: |

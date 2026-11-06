@@ -10,6 +10,7 @@ permissions:
   contents: read
 jobs:
   ai:
+    if: ${{ false }} # Paid API access and hosted execution disabled.
     # A repository environment can enforce reviewer approval and spend controls.
     environment: ai-showcase
     runs-on: ubuntu-latest
@@ -31,7 +32,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           AI_MODEL: ${{ inputs.model }}
       - uses: actions/upload-artifact@v7
-        if: always()
+        if: ${{ false }} # Disabled by zero-spend policy.
         with:
           name: live-ai-evidence
           path: artifacts/

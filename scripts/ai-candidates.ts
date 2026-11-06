@@ -8,6 +8,7 @@ import { redact } from '../src/ai/guardrails';
 import { renderCandidate, assessCandidate, candidateHash } from '../src/ai/test-generation';
 async function main() {
   const live = process.argv.includes('--live');
+  if (live) throw new Error('Live AI is disabled by the zero-spend policy. Use offline examples.');
   if (live && (!process.env.OPENAI_API_KEY || !process.env.AI_MODEL))
     throw new Error('Live generation requires OPENAI_API_KEY and AI_MODEL');
   const requirements: Requirement[] = JSON.parse(

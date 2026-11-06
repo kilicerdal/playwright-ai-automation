@@ -18,6 +18,12 @@ test('navigation, result search, and offline AI Studio work', async ({ page }) =
   await expect(
     page.getByRole('heading', { name: 'Quality that survives a restart.' }),
   ).toBeVisible();
+  await page.getByRole('button', { name: /V4 journey intelligence/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Follow the journey. Prove every step.' }),
+  ).toBeVisible();
+  await page.getByText(/J-CANCEL · Cancellation/).click();
+  await expect(page.getByRole('table', { name: 'Step evidence for J-CANCEL' })).toBeVisible();
   await page.getByRole('button', { name: /Test explorer/ }).click();
   await page.getByLabel('Filter test results').fill('no-test-can-match-this');
   await expect(page.getByText('No matching tests.')).toBeVisible();
@@ -58,6 +64,26 @@ test('dashboard accessibility and mobile layout', async ({ page }) => {
   expect(
     (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
   ).toEqual([]);
+  await page.getByRole('button', { name: /V4 journey intelligence/ }).click();
+  await page.getByText(/J-CANCEL · Cancellation/).click();
+  const overflow = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('body *'))
+      .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+      .slice(0, 12)
+      .map((e) => ({
+        tag: e.tagName,
+        class: e.className,
+        width: e.getBoundingClientRect().width,
+        text: e.textContent?.slice(0, 70),
+      })),
+  );
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    JSON.stringify(overflow),
+  ).toBe(true);
+  expect(
+    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
+  ).toEqual([]);
 });
 test('Studio rejects cross-origin requests', async ({ request }) => {
   const response = await request.post('/api/ai/run', {
@@ -80,4 +106,14 @@ test('Studio status exposes availability without credentials', async ({ request 
   expect(typeof body.liveAvailable).toBe('boolean');
   expect(body).not.toHaveProperty('apiKey');
   expect(body.limit).toBe(10);
+});
+
+test('Studio blocks live requests under the zero-spend policy', async ({ request }) => {
+  const response = await request.post('/api/ai/run', {
+    headers: { Origin: 'http://127.0.0.1:4174' },
+    data: { task: 'plan', mode: 'live', question: 'Plan checkout tests' },
+  });
+  expect(response.status()).toBe(403);
+  expect((await response.json()).error).toContain('zero-spend');
+  expect((await (await request.get('/api/ai/status')).json()).liveAvailable).toBe(false);
 });

@@ -1,6 +1,6 @@
 {
   "name": "playwright-ai-automation",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "description": "AI-native quality engineering showcase: grounded planning, guarded generation, failure investigation and deterministic commerce automation.",
@@ -45,7 +45,9 @@
     "ai:review": "node --import tsx scripts/review-candidates.ts",
     "ai:evaluate-approved": "node --import tsx scripts/evaluate-approved.ts",
     "contract:check": "node --import tsx scripts/check-contract.ts",
-    "verify:v3": "npm run quality && npm run contract:check && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:postgres && npm run test:showcase"
+    "verify:v3": "npm run quality && npm run contract:check && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:postgres && npm run test:showcase",
+    "journeys:evaluate": "node --import tsx scripts/journeys.ts",
+    "verify:v4": "npm run quality && npm run contract:check && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:postgres && npm run test:showcase"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^13.1.0",

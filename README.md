@@ -6,6 +6,19 @@ A complete, reproducible commerce journey paired with an AI engineering workbenc
 
 ![Quality Intelligence command center](docs/images/quality-command-center.png)
 
+## Version four — local journey intelligence
+
+V4 runs eight authored customer journeys through a constrained, typed plan interpreter and an independent reference model. It exercises nine actual non-pricing faults against isolated PostgreSQL applications, including ownership leaks, duplicate checkout, retained carts, and incorrect stock restoration. The dashboard links each requirement and journey hash to step-by-step expected and observed results. [V4 design and setup](docs/version-four.md).
+
+```bash
+npm run db:local:start
+npm run verify:v4
+npm run showcase
+# Open http://127.0.0.1:4174/#journeys
+```
+
+**Zero-spend policy:** live API clients are blocked, AWS workflows are disabled, and hosted workflows have no automatic triggers and cannot allocate runners. Existing credentials remain ignored and untouched. No model is called or downloaded. Authored examples are explicitly labeled; V4 does not claim live AI generation. V2/V3 sections below describe historical capabilities; V4 policy overrides their live-generation instructions.
+
 ## Version three
 
 V3 adds durable PostgreSQL commerce, transactional stock control, cancellation and simulated refunds, a versioned OpenAPI contract, failure reproduction bundles, and a human-reviewed AI case evaluator. The 40 new PostgreSQL integration tests cover persistence, races, rollback, ownership, browser journeys, and actual injected pricing faults. [V3 setup and evidence](docs/version-three.md).

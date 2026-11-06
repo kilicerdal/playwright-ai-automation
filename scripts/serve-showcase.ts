@@ -4,7 +4,6 @@ import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 import { requirementSchema, type Task } from '../src/ai/contracts';
 import { OfflineProvider } from '../src/ai/offline';
-import { OpenAIProvider } from '../src/ai/provider';
 import { runTask } from '../src/ai/pipeline';
 const port = Number(process.env.SHOWCASE_PORT ?? 4174);
 const origin = `http://127.0.0.1:${port}`;
@@ -19,7 +18,7 @@ const requirements = z
   .array(requirementSchema)
   .parse(JSON.parse(await readFile('requirements/commerce.json', 'utf8')));
 let busy = false;
-let liveCalls = 0;
+const liveCalls = 0;
 const server = createServer(async (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Cache-Control', 'no-store');
@@ -32,7 +31,7 @@ const server = createServer(async (req, res) => {
     return json(403, { error: 'Use the loopback address printed by the server' });
   if (req.url === '/api/ai/status' && req.method === 'GET')
     return json(200, {
-      liveAvailable: Boolean(process.env.OPENAI_API_KEY && process.env.AI_MODEL),
+      liveAvailable: false,
       model: process.env.AI_MODEL || null,
       liveCalls,
       limit: 10,
@@ -54,23 +53,15 @@ const server = createServer(async (req, res) => {
       const parsed = schema.safeParse(JSON.parse(body));
       if (!parsed.success)
         return json(422, { error: 'Choose a task, mode, and question of 1–6000 characters' });
-      if (parsed.data.mode === 'live' && (!process.env.OPENAI_API_KEY || !process.env.AI_MODEL))
-        return json(503, {
-          error: 'Live mode needs OPENAI_API_KEY and AI_MODEL in .env, then restart this server',
-        });
-      if (parsed.data.mode === 'live' && liveCalls >= 10)
-        return json(429, {
-          error:
-            'Live task limit reached for this server session (10). Restart intentionally to reset.',
+      if (parsed.data.mode === 'live')
+        return json(403, {
+          error: 'Live AI is disabled by the zero-spend policy. Choose authored offline examples.',
         });
       if (busy) return json(429, { error: 'An AI task is already running' });
       busy = true;
       acquired = true;
-      if (parsed.data.mode === 'live') liveCalls++;
-      const provider =
-        parsed.data.mode === 'live'
-          ? new OpenAIProvider(process.env.AI_MODEL!)
-          : new OfflineProvider(requirements);
+
+      const provider = new OfflineProvider(requirements);
       const context = {
         requirements,
         question: parsed.data.question,

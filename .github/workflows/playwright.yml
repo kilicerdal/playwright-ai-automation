@@ -1,9 +1,6 @@
-name: Quality Engineering V3
+name: Quality Engineering V4 (Local-only policy)
+# Zero-spend mode: manual definition only, hosted execution disabled below.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -12,6 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   quality:
+    if: ${{ false }} # User policy: no hosted compute until explicitly reauthorized.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -68,6 +66,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+        timeout-minutes: 5
       - name: Execute API and browser shard
         run: npx playwright test --project=api --project=chromium --project=firefox --project=webkit --project=mobile-chrome --shard=${{ matrix.shard }}/2 --reporter=blob
       - uses: actions/upload-artifact@v7
@@ -102,6 +101,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+        timeout-minutes: 5
       - run: npm run test:postgres
       - uses: actions/upload-artifact@v7
         if: always()
@@ -145,6 +145,7 @@ jobs:
       - run: npx playwright merge-reports --config=playwright.merge.config.ts all-blob-reports
       - run: npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run showcase:build
       - run: npx playwright install --with-deps chromium
+        timeout-minutes: 5
       - run: npm run test:showcase
       - name: Job summary
         if: always()

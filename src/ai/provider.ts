@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { schemas, type Task } from './contracts';
@@ -18,12 +18,16 @@ export class OpenAIProvider implements Provider {
   readonly mode = 'live' as const;
   constructor(
     private readonly model: string,
-    private readonly client: ResponsesClient = new OpenAI({ timeout: 45000, maxRetries: 0 }),
+    private readonly client?: ResponsesClient,
   ) {
+    if (!client)
+      throw new Error(
+        'Live API access is disabled by the zero-spend policy. Only injected test doubles are supported.',
+      );
     if (!model.trim()) throw new Error('AI_MODEL is required for live mode');
   }
   async generate(task: Task, prompt: string): Promise<ModelResult> {
-    const response = await this.client.responses.parse({
+    const response = await this.client!.responses.parse({
       model: this.model,
       store: false,
       max_output_tokens: 6000,

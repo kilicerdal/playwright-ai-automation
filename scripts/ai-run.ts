@@ -7,6 +7,7 @@ import { OpenAIProvider } from '../src/ai/provider';
 import { runTask } from '../src/ai/pipeline';
 import { redact, retrieve } from '../src/ai/guardrails';
 const live = process.argv.includes('--live');
+if (live) throw new Error('Live AI is disabled by the zero-spend policy. Use offline examples.');
 if (live && (!process.env.OPENAI_API_KEY || !process.env.AI_MODEL))
   throw new Error('Live mode requires OPENAI_API_KEY and AI_MODEL. No fallback to offline.');
 const requirements = z

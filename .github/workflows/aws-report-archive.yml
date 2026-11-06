@@ -11,7 +11,7 @@ permissions:
   contents: read
 jobs:
   upload:
-    if: github.ref == 'refs/heads/main' && inputs.confirm_cost_review && vars.AWS_REPORTS_ENABLED == 'true'
+    if: ${{ false }} # Disabled by zero-spend policy.
     environment: aws-reports
     permissions:
       contents: read
@@ -26,6 +26,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
+        timeout-minutes: 5
       - run: npm run verify
       - run: npm run aws:summary
       - name: Obtain short-lived AWS credentials

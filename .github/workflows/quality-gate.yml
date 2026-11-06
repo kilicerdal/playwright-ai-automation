@@ -1,10 +1,10 @@
 name: Quality Gate
 on:
-  pull_request:
   workflow_dispatch:
 
 jobs:
   static-checks:
+    if: ${{ false }} # Zero-spend policy: no hosted runner.
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
