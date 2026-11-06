@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:17.11
+    environment:
+      POSTGRES_USER: eai_demo
+      POSTGRES_PASSWORD: eai_demo
+      POSTGRES_DB: eai_quality
+    ports:
+      - '127.0.0.1:55432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U eai_demo -d eai_quality']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - eai_pg_data:/var/lib/postgresql/data
+volumes:
+  eai_pg_data:

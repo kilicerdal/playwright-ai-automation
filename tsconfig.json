@@ -18,6 +18,7 @@
     "scripts/**/*.ts",
     "playwright.showcase.config.ts",
     "playwright.visual.config.ts",
-    "playwright.merge.config.ts"
+    "playwright.merge.config.ts",
+    "playwright.postgres.config.ts"
   ]
 }

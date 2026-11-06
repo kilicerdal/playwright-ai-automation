@@ -1,0 +1,8 @@
+CREATE TABLE customers (id text PRIMARY KEY CHECK (id IN ('demo','buyer2')));
+CREATE TABLE sessions (id uuid PRIMARY KEY, customer_id text NOT NULL REFERENCES customers(id), csrf uuid NOT NULL, expires_at timestamptz NOT NULL);
+CREATE INDEX sessions_expiry ON sessions(expires_at);
+CREATE TABLE inventory (id text PRIMARY KEY, name text NOT NULL, category text NOT NULL, price integer NOT NULL CHECK(price>0), available integer NOT NULL CHECK(available>=0), glyph text NOT NULL, color text NOT NULL);
+CREATE TABLE cart_items (session_id uuid NOT NULL REFERENCES sessions(id) ON DELETE CASCADE, product_id text NOT NULL REFERENCES inventory(id), quantity integer NOT NULL CHECK(quantity BETWEEN 1 AND 20), PRIMARY KEY(session_id,product_id));
+CREATE TABLE orders (id uuid PRIMARY KEY, customer_id text NOT NULL REFERENCES customers(id), idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 8 AND 100), fingerprint text NOT NULL, total integer NOT NULL CHECK(total>0), status text NOT NULL CHECK(status IN ('confirmed','cancelled','refunded')), created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(customer_id,idempotency_key));
+CREATE TABLE order_items (order_id uuid NOT NULL REFERENCES orders(id), product_id text NOT NULL REFERENCES inventory(id), quantity integer NOT NULL CHECK(quantity BETWEEN 1 AND 20), unit_price integer NOT NULL CHECK(unit_price>0), PRIMARY KEY(order_id,product_id));
+CREATE TABLE order_events (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, order_id uuid NOT NULL REFERENCES orders(id), kind text NOT NULL CHECK(kind IN ('confirmed','cancelled','refunded')), created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(order_id,kind));

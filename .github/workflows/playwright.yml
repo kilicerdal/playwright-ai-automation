@@ -1,4 +1,4 @@
-name: Quality Engineering V2
+name: Quality Engineering V3
 on:
   push:
     branches: [main]
@@ -24,6 +24,7 @@ jobs:
       - run: npm run quality
       - run: npm audit --audit-level=moderate
       - run: npm run aws:check
+      - run: npm run contract:check
   ai-evaluation:
     needs: quality
     runs-on: ubuntu-latest
@@ -75,8 +76,46 @@ jobs:
           name: blob-main-${{ matrix.shard }}
           path: blob-report/
           retention-days: 7
+  postgres:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: eai_demo
+          POSTGRES_PASSWORD: eai_demo
+          POSTGRES_DB: eai_quality
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U eai_demo -d eai_quality"
+          --health-interval 2s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://eai_demo:eai_demo@127.0.0.1:55432/eai_quality
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:postgres
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: postgres-evidence
+          path: |
+            artifacts/postgres-results.json
+            artifacts/v3-fixture-evaluation.json
+            artifacts/reproductions/
+            playwright-report/postgres/
+            test-results/postgres/
+          retention-days: 14
   evidence:
-    needs: [quality, ai-evaluation, test]
+    needs: [quality, ai-evaluation, test, postgres]
     if: always() && needs.quality.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -92,6 +131,15 @@ jobs:
           pattern: blob-*
           path: all-blob-reports
           merge-multiple: true
+      - uses: actions/download-artifact@v7
+        with:
+          name: postgres-evidence
+          path: postgres-evidence
+      - name: Stage database summaries
+        run: |
+          mkdir -p artifacts
+          cp postgres-evidence/artifacts/postgres-results.json artifacts/
+          cp postgres-evidence/artifacts/v3-fixture-evaluation.json artifacts/
       - name: Require complete evidence from all three test jobs
         run: node scripts/check-shards.mjs
       - run: npx playwright merge-reports --config=playwright.merge.config.ts all-blob-reports
@@ -111,6 +159,8 @@ jobs:
             artifacts/quality.json
             artifacts/ai-run.json
             artifacts/ai-evaluation.json
+            artifacts/postgres-results.json
+            artifacts/v3-fixture-evaluation.json
             artifacts/candidates/
             showcase/
           retention-days: 14

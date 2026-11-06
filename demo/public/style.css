@@ -311,3 +311,19 @@ footer {
     font-size: 12px;
   }
 }
+
+#backend-label {
+  margin-top: 12px;
+  color: #376b55;
+}
+#orders-panel {
+  margin-top: 24px;
+}
+.order-card {
+  border-top: 1px solid #dae1d9;
+  padding: 18px 0;
+  overflow-wrap: anywhere;
+}
+.order-card button {
+  margin: 6px 10px 0 0;
+}

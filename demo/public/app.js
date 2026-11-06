@@ -1,6 +1,17 @@
 /* All dynamic content uses textContent. Model output is never executed here. */
 const $ = (selector) => document.querySelector(selector);
 let csrf = '';
+let durable = false;
+const capabilities = fetch('/api/health')
+  .then((response) => response.json())
+  .then((health) => {
+    durable = health.backend === 'postgres';
+    if (durable) {
+      $('#backend-label').textContent = 'POSTGRESQL / SHARED INVENTORY / DEMO IDENTITY';
+      $('#backend-label').hidden = false;
+    }
+  })
+  .catch(() => {});
 let checkoutKey = crypto.randomUUID();
 let checkoutFingerprint = '';
 const money = (cents) =>
@@ -83,12 +94,53 @@ async function showProducts() {
     $('#products').append(article);
   }
 }
+async function showOrders() {
+  if (!durable) return;
+  const orders = await api('/orders');
+  const container = $('#order-history');
+  container.replaceChildren();
+  $('#orders-panel').hidden = false;
+  if (!orders.length) container.append(text('p', 'No orders for this customer yet.', 'hint'));
+  for (const order of orders) {
+    const row = text('article', '', 'order-card');
+    row.append(
+      text('h3', 'Order ' + order.id),
+      text('p', money(order.total) + ' · ' + order.status),
+    );
+    if (order.status === 'confirmed')
+      for (const [action, label] of [
+        ['cancel', 'Cancel demo order'],
+        ['refund', 'Simulate refund'],
+      ]) {
+        const button = text('button', label);
+        button.onclick = async () => {
+          button.disabled = true;
+          try {
+            await api('/orders/' + order.id + '/' + action, { method: 'POST' });
+            await Promise.all([showOrders(), showProducts()]);
+            message(
+              action === 'cancel'
+                ? 'Demo order cancelled; stock restored'
+                : 'Demo refund recorded; stock restored',
+            );
+          } catch (error) {
+            message(error.message);
+            button.disabled = false;
+          }
+        };
+        row.append(button);
+      }
+    container.append(row);
+  }
+}
 async function enter(session) {
+  await capabilities;
+  $('#order-history').replaceChildren();
   csrf = session.csrf;
   $('#login-panel').hidden = true;
   $('#shop').hidden = false;
   $('#logout').hidden = false;
-  await Promise.all([showProducts(), showCart()]);
+  await Promise.all([showProducts(), showCart(), showOrders()]);
 }
 $('#login').onsubmit = async (event) => {
   event.preventDefault();
@@ -111,6 +163,8 @@ $('#logout').onclick = async () => {
     $('#logout').hidden = true;
     $('#login-panel').hidden = false;
     $('#password').value = '';
+    $('#order-history').replaceChildren();
+    $('#confirmation').hidden = true;
     message('You are signed out');
   } catch (e) {
     message(e.message);
@@ -139,7 +193,7 @@ $('#checkout').onsubmit = async (event) => {
     $('#order-detail').textContent = `Order ${order.id} · ${money(order.total)} · ${order.status}`;
     checkoutKey = crypto.randomUUID();
     checkoutFingerprint = '';
-    await showCart();
+    await Promise.all([showCart(), showProducts(), showOrders()]);
     $('#confirmed-heading').focus();
     message('Your demo order is confirmed');
   } catch (e) {

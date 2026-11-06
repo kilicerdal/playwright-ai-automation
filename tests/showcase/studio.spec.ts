@@ -14,6 +14,10 @@ test('navigation, result search, and offline AI Studio work', async ({ page }) =
     page.getByRole('heading', { name: 'Test generation, with evidence.' }),
   ).toBeVisible();
   await expect(page.getByText('pending-human-review', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /V3 database evidence/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Quality that survives a restart.' }),
+  ).toBeVisible();
   await page.getByRole('button', { name: /Test explorer/ }).click();
   await page.getByLabel('Filter test results').fill('no-test-can-match-this');
   await expect(page.getByText('No matching tests.')).toBeVisible();
@@ -48,6 +52,11 @@ test('dashboard accessibility and mobile layout', async ({ page }) => {
         .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
         .analyze()
     ).violations,
+  ).toEqual([]);
+  await page.getByRole('button', { name: /V3 database evidence/ }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(
+    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
   ).toEqual([]);
 });
 test('Studio rejects cross-origin requests', async ({ request }) => {

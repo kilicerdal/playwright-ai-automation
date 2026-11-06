@@ -1,0 +1,74 @@
+name: Reviewed AI Candidate Evaluation
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: Successful Live AI Evaluation run for this exact commit
+        required: true
+        type: string
+      code_hash:
+        description: SHA-256 of the candidate source you reviewed
+        required: true
+        type: string
+      confirm_review:
+        description: I reviewed every case and its source and approve fixed-endpoint execution
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+  actions: read
+jobs:
+  evaluate:
+    if: github.ref == 'refs/heads/main' && inputs.confirm_review
+    environment: ai-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: eai_demo
+          POSTGRES_PASSWORD: eai_demo
+          POSTGRES_DB: eai_quality
+        ports: ['55432:5432']
+        options: >-
+          --health-cmd "pg_isready -U eai_demo -d eai_quality"
+          --health-interval 2s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://eai_demo:eai_demo@127.0.0.1:55432/eai_quality
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify provenance of the source run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ inputs.source_run_id }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN}" > /tmp/source-run.json
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('/tmp/source-run.json')); if(r.head_sha!==process.env.EXPECTED_SHA || r.conclusion!=='success' || !r.path.endsWith('ai-live.yml')) throw new Error('Source run must be successful live generation for this exact commit');"
+      - uses: actions/download-artifact@v7
+        with:
+          name: live-ai-evidence
+          path: artifacts
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+      - name: Record explicit operator approval
+        env:
+          REVIEW_HASH: ${{ inputs.code_hash }}
+          REVIEWER: ${{ github.actor }}
+        run: npm run ai:review -- --approve "--hash=${REVIEW_HASH}" "--reviewer=${REVIEWER}"
+      - run: npm run ai:evaluate-approved
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: reviewed-ai-evaluation
+          path: |
+            artifacts/approved-evaluation.json
+            artifacts/candidates/approval.json
+          retention-days: 14

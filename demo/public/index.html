@@ -30,6 +30,7 @@
           <span>Isolated sessions</span><span>Real API workflows</span><span>No real payments</span>
         </div>
       </section>
+      <div id="backend-label" class="eyebrow" hidden></div>
       <div id="message" role="status" aria-live="polite"></div>
       <section id="login-panel" class="panel">
         <div>
@@ -104,6 +105,15 @@
             </form>
           </section>
         </div>
+        <section id="orders-panel" class="panel" hidden>
+          <p class="eyebrow">PERSISTENT ORDER HISTORY</p>
+          <h2>Your demo orders.</h2>
+          <p class="hint">
+            Cancellation and refund actions are simulations. Each returns stock once; no payment is
+            collected or refunded.
+          </p>
+          <div id="order-history"></div>
+        </section>
         <section id="confirmation" class="panel" hidden aria-labelledby="confirmed-heading">
           <p class="eyebrow">JOURNEY COMPLETE</p>
           <h2 id="confirmed-heading" tabindex="-1">Order confirmed.</h2>

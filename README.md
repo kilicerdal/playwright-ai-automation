@@ -6,6 +6,18 @@ A complete, reproducible commerce journey paired with an AI engineering workbenc
 
 ![Quality Intelligence command center](docs/images/quality-command-center.png)
 
+## Version three
+
+V3 adds durable PostgreSQL commerce, transactional stock control, cancellation and simulated refunds, a versioned OpenAPI contract, failure reproduction bundles, and a human-reviewed AI case evaluator. The 40 new PostgreSQL integration tests cover persistence, races, rollback, ownership, browser journeys, and actual injected pricing faults. [V3 setup and evidence](docs/version-three.md).
+
+```bash
+npm run db:local:start  # requires installed PostgreSQL binaries
+npm run verify:v3
+npm run demo:postgres  # http://127.0.0.1:4175
+```
+
+Live AI generation remains pending API credits. The evaluation rehearsal uses explicitly labeled authored fixtures. AWS deployment remains disabled and formal template validation is pending.
+
 ## Version two
 
 **160 distinct active tests**, six AI workflows, a generated-test review queue, independent expectation oracles, compiler gates, ten seeded-defect checks, and sharded CI. [Read the version-two design](docs/version-two.md).
