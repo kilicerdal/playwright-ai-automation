@@ -1,0 +1,42 @@
+name: Optional AWS Evidence Summary
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_cost_review:
+        description: I reviewed this account's plan, credits, S3 charges and retention
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  upload:
+    if: github.ref == 'refs/heads/main' && inputs.confirm_cost_review && vars.AWS_REPORTS_ENABLED == 'true'
+    environment: aws-reports
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run verify
+      - run: npm run aws:summary
+      - name: Obtain short-lived AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          aws-region: ${{ vars.AWS_REPORT_REGION }}
+          role-to-assume: ${{ vars.AWS_REPORT_ROLE_ARN }}
+          allowed-account-ids: ${{ vars.AWS_REPORT_ACCOUNT_ID }}
+          role-session-name: evidence-${{ github.run_id }}
+          role-duration-seconds: 900
+      - name: Upload curated summary only
+        env:
+          REPORT_BUCKET: ${{ vars.AWS_REPORT_BUCKET }}
+        run: aws s3 cp artifacts/aws-summary.json "s3://${REPORT_BUCKET}/reports/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/summary.json" --sse AES256 --content-type application/json --only-show-errors

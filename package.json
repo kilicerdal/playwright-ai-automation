@@ -1,6 +1,6 @@
 {
   "name": "playwright-ai-automation",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "description": "AI-native quality engineering showcase: grounded planning, guarded generation, failure investigation and deterministic commerce automation.",
@@ -30,8 +30,14 @@
     "ai:live": "node --import tsx scripts/ai-run.ts --live",
     "showcase:build": "node --import tsx scripts/build-showcase.ts",
     "showcase": "node --import tsx scripts/serve-showcase.ts",
-    "verify": "npm run quality && npm test && npm run ai:demo && npm run test:showcase",
-    "test:showcase": "npm run showcase:build && playwright test --config=playwright.showcase.config.ts"
+    "verify": "npm run quality && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:showcase",
+    "test:showcase": "npm run showcase:build && playwright test --config=playwright.showcase.config.ts",
+    "ai:candidates": "node --import tsx scripts/ai-candidates.ts",
+    "ai:candidates:live": "node --import tsx scripts/ai-candidates.ts --live",
+    "ai:evaluate": "node --import tsx scripts/ai-evaluate.ts",
+    "aws:check": "node scripts/check-aws-template.mjs",
+    "aws:summary": "node scripts/aws-summary.mjs",
+    "ai:check": "node --import tsx scripts/check-ai.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

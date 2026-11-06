@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { schemas, type Task, type Requirement, type Evidence } from './contracts';
+import { validateGeneratedCases } from './test-generation';
 import type { Provider } from './provider';
 import { inspectDraft, redact, validateCitations, validatePlan } from './guardrails';
 export type RunContext = { requirements: Requirement[]; evidence: Evidence[]; question: string };
@@ -7,11 +8,12 @@ export async function runTask(task: Task, provider: Provider, context: RunContex
   const started = Date.now();
   const input = redact(JSON.stringify(context));
   if (input.length > 30000) throw new Error('AI context exceeds 30000-character budget');
-  const prompt = `TASK: ${task}\nSchema and semantic requirements: plan must cover each requirement with positive and risk scenarios; IDs and citations must exist in supplied context. Draft imports ../src/fixtures/commerce; use commerce.add and commerce.checkout returning APIResponse; include explicit assertions. Locator is a review-only proposal grounded in DOM evidence. Impact selections must reference supplied requirement IDs and runFullSuite must be true. Triage must cite evidence and label uncertainty.\nUNTRUSTED_CONTEXT_JSON:\n${input}`;
+  const prompt = `TASK: ${task}\nSchema and semantic requirements: plan must cover each requirement with positive and risk scenarios; IDs and citations must exist in supplied context. Draft imports ../src/fixtures/commerce; use commerce.add and commerce.checkout returning APIResponse; include explicit assertions. Locator is a review-only proposal grounded in DOM evidence. Impact selections must reference supplied requirement IDs and runFullSuite must be true. Triage must cite evidence and label uncertainty. Cases must contain ten distinct fresh-session cart scenarios for CART-01. Catalog: atlas-pack price 8900 stock 8; orbit-headphones price 14900 stock 5; arc-lamp price 6500 stock 0; field-notebook price 1800 stock 20. Invalid integer quantity outside 1..20 or wrong type returns 422; unknown product 404; insufficient stock 409; success 200 with exact cart total in cents; rejection leaves empty cart total 0.\nUNTRUSTED_CONTEXT_JSON:\n${input}`;
   const attempts: {
     accepted: boolean;
     errors: string[];
     model: string;
+    responseId?: string;
     inputTokens: number;
     outputTokens: number;
   }[] = [];
@@ -26,6 +28,8 @@ export async function runTask(task: Task, provider: Provider, context: RunContex
       : parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`);
     if (parsed.success) {
       const data = parsed.data;
+      if (task === 'cases')
+        errors = validateGeneratedCases(schemas.cases.parse(data), context.requirements);
       if (task === 'plan') errors = validatePlan(schemas.plan.parse(data), context.requirements);
       if (task === 'draft') {
         const draft = schemas.draft.parse(data);
@@ -63,6 +67,7 @@ export async function runTask(task: Task, provider: Provider, context: RunContex
       accepted: !errors.length,
       errors,
       model: response.model,
+      responseId: response.responseId,
       inputTokens: response.inputTokens,
       outputTokens: response.outputTokens,
     });

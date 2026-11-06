@@ -9,6 +9,11 @@ test('navigation, result search, and offline AI Studio work', async ({ page }) =
   await page.getByRole('button', { name: 'Run validated AI task →', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Authored examples');
   await expect(page.locator('#studio-result')).toContainText('checkout retry preserves one order');
+  await page.getByRole('button', { name: /Generated test review/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Test generation, with evidence.' }),
+  ).toBeVisible();
+  await expect(page.getByText('pending-human-review', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: /Test explorer/ }).click();
   await page.getByLabel('Filter test results').fill('no-test-can-match-this');
   await expect(page.getByText('No matching tests.')).toBeVisible();
@@ -25,6 +30,18 @@ test('dashboard accessibility and mobile layout', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: /AI engineering lab/ }).click();
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+  await page.getByRole('button', { name: /Generated test review/ }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Test generation, with evidence.' }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(
     (
       await new AxeBuilder({ page })

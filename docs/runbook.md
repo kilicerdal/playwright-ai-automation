@@ -45,3 +45,7 @@ Use `npm audit --audit-level=moderate`; review dependency updates and rerun veri
 ## macOS Firefox application-data isolation
 
 The pinned Firefox build can fail at startup on macOS when the real Firefox application-data directory is protected. On macOS only, the configuration gives the test browser a separate `CFFIXED_USER_HOME` under ignored `artifacts/firefox-app-home`. This does not change the system HOME or privacy permissions. The workaround was verified locally. Review it when upgrading beyond the affected build. See [Playwright issue 42768](https://github.com/microsoft/playwright/issues/42768).
+
+## Version-two release and live candidates
+
+`npm run verify` now includes generation of ten offline-example candidates and the deterministic AI evaluation summary. Run `npm run ai:candidates:live` separately to produce live-model cases. Review the manifest and source before promotion. `npm run aws:check` does not deploy resources or replace formal CloudFormation validation.

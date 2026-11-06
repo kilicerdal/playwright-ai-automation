@@ -51,3 +51,7 @@ npm run ai:live -- --results=test-results/results.json
 ```
 
 This replaces the illustrative incident with a bounded, redacted extract of actual Playwright stats and suites. Inspect the report locally before sending it. A successful suite should be reported as no observed failure. In offline mode, use the default synthetic incident; authored examples are not a general report-analysis engine.
+
+## Version-two case generation
+
+See [version two](version-two.md) for the sixth AI workflow, independent expectation oracle, virtual compiler, review manifest and seeded-defect evaluation. The CLI commands `ai:candidates` and `ai:candidates:live` produce separate offline/live provenance. Neither executes the candidates. The original five-task CLI remains available for the other workflows.

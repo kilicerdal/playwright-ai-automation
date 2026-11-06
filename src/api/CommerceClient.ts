@@ -20,7 +20,7 @@ export class CommerceClient {
     });
   }
   checkout(
-    key = randomUUID(),
+    key: string = randomUUID(),
     shipping = { name: 'Alex Engineer', address: '100 Test Avenue' },
   ): Promise<APIResponse> {
     return this.request.post('/api/orders', {

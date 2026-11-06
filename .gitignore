@@ -9,3 +9,5 @@ artifacts/
 /showcase/
 .DS_Store
 *.backup
+
+/all-blob-reports/

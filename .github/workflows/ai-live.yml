@@ -21,6 +21,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Generate live API-test candidates for review
+        run: npm run ai:candidates:live
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_MODEL: ${{ inputs.model }}
       - run: npm run ai:live
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { schemas, type Task } from './contracts';
 export type ModelResult = {
   data: unknown;
+  responseId?: string;
   inputTokens: number;
   outputTokens: number;
   model: string;
@@ -35,6 +36,7 @@ export class OpenAIProvider implements Provider {
       throw new Error('AI response incomplete, refused, or missing structured output');
     return {
       data: response.output_parsed,
+      responseId: response.id,
       model: response.model,
       inputTokens: response.usage?.input_tokens ?? 0,
       outputTokens: response.usage?.output_tokens ?? 0,

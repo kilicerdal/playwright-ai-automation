@@ -1,4 +1,4 @@
-name: Quality Engineering
+name: Quality Engineering V2
 on:
   push:
     branches: [main]
@@ -23,10 +23,42 @@ jobs:
       - run: npm ci
       - run: npm run quality
       - run: npm audit --audit-level=moderate
+      - run: npm run aws:check
+  ai-evaluation:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: AI compiler, oracle, guardrail and seeded-defect regressions
+        run: npx playwright test --project=framework --reporter=blob
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: blob-ai
+          path: blob-report/
+          retention-days: 7
+      - name: Generate validated offline candidates without executing them
+        run: npm run ai:candidates
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: candidate-review-queue
+          path: artifacts/candidates/
+          retention-days: 7
   test:
     needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -35,14 +67,40 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Browser, API, accessibility, security and AI guardrail suites
-        run: npm test
-      - name: Build authored AI examples and evidence report
+      - name: Execute API and browser shard
+        run: npx playwright test --project=api --project=chromium --project=firefox --project=webkit --project=mobile-chrome --shard=${{ matrix.shard }}/2 --reporter=blob
+      - uses: actions/upload-artifact@v7
         if: always()
-        run: npm run ai:demo && npm run showcase:build
-      - name: Verify interactive showcase
-        if: success()
-        run: npm run test:showcase
+        with:
+          name: blob-main-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 7
+  evidence:
+    needs: [quality, ai-evaluation, test]
+    if: always() && needs.quality.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: blob-*
+          path: all-blob-reports
+          merge-multiple: true
+      - name: Require complete evidence from all three test jobs
+        run: node scripts/check-shards.mjs
+      - run: npx playwright merge-reports --config=playwright.merge.config.ts all-blob-reports
+      - run: npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run showcase:build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:showcase
+      - name: Job summary
+        if: always()
+        run: node scripts/ci-summary.mjs >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -50,9 +108,9 @@ jobs:
           path: |
             playwright-report/
             test-results/
-            artifacts/
+            artifacts/quality.json
+            artifacts/ai-run.json
+            artifacts/ai-evaluation.json
+            artifacts/candidates/
             showcase/
           retention-days: 14
-      - name: Job summary
-        if: always()
-        run: node scripts/ci-summary.mjs >> "$GITHUB_STEP_SUMMARY"

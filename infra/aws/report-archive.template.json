@@ -1,0 +1,230 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Optional private quality-evidence summary archive; short retention and OIDC-only CI upload, no automatic deployment.",
+  "Metadata": {
+    "com.aws.cloudformation.Context": {
+      "ref": ["docs/aws-integration.md"],
+      "must": [
+        "Keep deployment and upload manual until account eligibility and costs are reviewed."
+      ]
+    }
+  },
+  "Parameters": {
+    "GitHubRepository": {
+      "Type": "String",
+      "Default": "kilicerdal/playwright-ai-automation",
+      "AllowedPattern": "[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
+      "Description": "Exact repository allowed to assume the upload role."
+    },
+    "GitHubEnvironment": {
+      "Type": "String",
+      "Default": "aws-reports",
+      "AllowedPattern": "[A-Za-z0-9_-]+",
+      "Description": "Protected GitHub environment; restrict deployment branches to main."
+    },
+    "GitHubOidcProviderArn": {
+      "Type": "String",
+      "AllowedPattern": "arn:aws:iam::[0-9]{12}:oidc-provider/token.actions.githubusercontent.com",
+      "Description": "Existing GitHub OIDC provider ARN in this account; reuse the account-wide provider."
+    },
+    "RetentionDays": {
+      "Type": "Number",
+      "Default": 7,
+      "MinValue": 1,
+      "MaxValue": 30,
+      "Description": "Current object retention. Noncurrent versions expire after one day."
+    }
+  },
+  "Resources": {
+    "EvidenceBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Private low-volume CI summary archive; SSE-S3 avoids a separate KMS key; retained on stack deletion to prevent data loss.",
+          "must": [
+            "Block public access, enforce bucket-owner ownership and preserve encryption.",
+            "Review retained bucket and noncurrent storage during teardown."
+          ],
+          "mutable": "review-required"
+        }
+      },
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+          "BlockPublicPolicy": true,
+          "RestrictPublicBuckets": true
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "ShortEvidenceRetention",
+              "Status": "Enabled",
+              "Prefix": "reports/",
+              "ExpirationInDays": {
+                "Ref": "RetentionDays"
+              },
+              "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 1
+              },
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+              }
+            },
+            {
+              "Id": "RemoveExpiredDeleteMarkers",
+              "Status": "Enabled",
+              "Prefix": "reports/",
+              "ExpiredObjectDeleteMarker": true
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Project",
+            "Value": "eai-quality-showcase"
+          },
+          {
+            "Key": "Purpose",
+            "Value": "optional-ci-summary"
+          }
+        ]
+      }
+    },
+    "EvidenceBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Reject all unencrypted transport, including otherwise authorized uploads.",
+          "must": ["Keep the explicit non-TLS deny for bucket and object resources."],
+          "mutable": "review-required"
+        }
+      },
+      "Properties": {
+        "Bucket": {
+          "Ref": "EvidenceBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "DenyNonTLS",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["EvidenceBucket", "Arn"]
+                },
+                {
+                  "Fn::Sub": "${EvidenceBucket.Arn}/*"
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "GitHubEvidenceUploader": {
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "GitHub short-lived identity uploads small approved summaries only; no long-lived AWS keys or read/delete privileges.",
+          "must": [
+            "Trust exact repository/environment subject and sts.amazonaws.com audience.",
+            "Restrict GitHub environment to main and require reviewer approval.",
+            "Allow only PutObject within this stack bucket reports prefix."
+          ],
+          "mutable": "review-required"
+        }
+      },
+      "Properties": {
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": {
+                  "Ref": "GitHubOidcProviderArn"
+                }
+              },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                  "token.actions.githubusercontent.com:sub": {
+                    "Fn::Sub": "repo:${GitHubRepository}:environment:${GitHubEnvironment}"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "UploadEvidenceSummaryOnly",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": ["s3:PutObject"],
+                  "Resource": {
+                    "Fn::Sub": "${EvidenceBucket.Arn}/reports/*"
+                  },
+                  "Condition": {
+                    "StringEquals": {
+                      "s3:x-amz-server-side-encryption": "AES256"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "EvidenceBucketName": {
+      "Description": "Private archive bucket; configure GitHub environment variable AWS_REPORT_BUCKET.",
+      "Value": {
+        "Ref": "EvidenceBucket"
+      }
+    },
+    "UploadRoleArn": {
+      "Description": "Configure GitHub environment variable AWS_REPORT_ROLE_ARN.",
+      "Value": {
+        "Fn::GetAtt": ["GitHubEvidenceUploader", "Arn"]
+      }
+    }
+  }
+}

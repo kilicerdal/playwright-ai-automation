@@ -1,11 +1,14 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import type { Reporter, FullResult, TestCase, TestResult } from '@playwright/test/reporter';
+import { relative } from 'node:path';
 import { redact } from '../ai/guardrails';
 export default class QualityReporter implements Reporter {
   private tests = new Map<
     string,
     {
       title: string;
+      scenarioId: string;
+      authorship: string;
       project: string;
       requirements: string[];
       status: string;
@@ -17,6 +20,10 @@ export default class QualityReporter implements Reporter {
   onTestEnd(test: TestCase, result: TestResult) {
     this.tests.set(test.id, {
       title: test.title,
+      scenarioId: `${relative(process.cwd(), test.location.file)}:${test.location.line}:${test.title}`,
+      authorship:
+        test.annotations.find((a) => a.type === 'authorship')?.description ??
+        'engineering-authored (AI-assisted)',
       project: test.parent.project()?.name ?? 'unknown',
       requirements: test.title.match(/@[A-Z]+-\d+/g)?.map((tag) => tag.slice(1)) ?? [],
       status: test.outcome(),
@@ -36,6 +43,7 @@ export default class QualityReporter implements Reporter {
           status: result.status,
           durationMs: result.duration,
           total: tests.length,
+          distinctScenarios: new Set(tests.map((t) => t.scenarioId)).size,
           passed: tests.filter((t) => t.status === 'expected').length,
           failed: tests.filter((t) => t.status === 'unexpected').length,
           flaky: tests.filter((t) => t.status === 'flaky').length,

@@ -6,6 +6,28 @@ export class OfflineProvider implements Provider {
   constructor(private readonly requirements: Requirement[]) {}
   async generate(task: Task): Promise<ModelResult> {
     const examples: Record<Task, unknown> = {
+      cases: {
+        cases: [
+          ['single-pack', 'Add one daypack', 'atlas-pack', 1, 200, 8900],
+          ['max-stock', 'Add all eight daypacks', 'atlas-pack', 8, 200, 71200],
+          ['over-stock', 'Reject ninth daypack', 'atlas-pack', 9, 409, 0],
+          ['zero', 'Reject zero quantity', 'atlas-pack', 0, 422, 0],
+          ['negative', 'Reject negative quantity', 'atlas-pack', -1, 422, 0],
+          ['fraction', 'Reject fractional quantity', 'atlas-pack', 1.5, 422, 0],
+          ['string', 'Reject numeric string', 'atlas-pack', '1', 422, 0],
+          ['null', 'Reject null quantity', 'atlas-pack', null, 422, 0],
+          ['unknown', 'Reject unknown product', 'unknown', 1, 404, 0],
+          ['sold-out', 'Reject sold-out lamp', 'arc-lamp', 1, 409, 0],
+        ].map(([id, title, productId, quantity, expectedStatus, expectedTotal]) => ({
+          id,
+          title,
+          requirementId: 'CART-01',
+          productId,
+          quantity,
+          expectedStatus,
+          expectedTotal,
+        })),
+      },
       plan: {
         summary: 'Risk-based commerce test plan (authored offline example)',
         scenarios: this.requirements.flatMap((r, i) => {

@@ -10,7 +10,7 @@ const port = Number(process.env.SHOWCASE_PORT ?? 4174);
 const origin = `http://127.0.0.1:${port}`;
 const schema = z
   .object({
-    task: z.enum(['plan', 'draft', 'triage', 'locator', 'impact']),
+    task: z.enum(['plan', 'draft', 'triage', 'locator', 'impact', 'cases']),
     mode: z.enum(['offline', 'live']),
     question: z.string().trim().min(1).max(6000),
   })

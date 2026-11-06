@@ -6,3 +6,5 @@ artifacts
 showcase
 playwright-report
 test-results
+
+/all-blob-reports/

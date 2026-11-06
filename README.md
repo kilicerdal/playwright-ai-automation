@@ -6,6 +6,17 @@ A complete, reproducible commerce journey paired with an AI engineering workbenc
 
 ![Quality Intelligence command center](docs/images/quality-command-center.png)
 
+## Version two
+
+**160 distinct active tests**, six AI workflows, a generated-test review queue, independent expectation oracles, compiler gates, ten seeded-defect checks, and sharded CI. [Read the version-two design](docs/version-two.md).
+
+```bash
+npm run ai:candidates:live  # requires the local API key and model setting
+# Inspect the quarantined draft and provenance in artifacts/candidates/
+```
+
+Live-generated candidates remain separate from authored/offline examples and active test counts. The optional [AWS summary archive](docs/aws-integration.md) is prepared but disabled; nothing deploys automatically.
+
 ## Experience it in five minutes
 
 Requires **Node.js 22+** and npm. No API key is needed for the suite or authored demo.
@@ -17,7 +28,7 @@ npm run verify
 npm run showcase
 ```
 
-Open **http://127.0.0.1:4174**. Explore the command center, run an offline task in **AI engineering lab → Interactive AI Studio**, search test results, and follow requirement-to-test mappings.
+Open **http://127.0.0.1:4174**. The Generated test review panel shows validation, provenance, and curated defect-detection evidence. Explore the command center, run an offline task in **AI engineering lab → Interactive AI Studio**, search test results, and follow requirement-to-test mappings.
 
 To browse the application under test separately:
 

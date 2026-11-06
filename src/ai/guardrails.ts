@@ -2,6 +2,10 @@ import ts from 'typescript';
 import type { Evidence, Plan, Requirement } from './contracts';
 export function redact(value: string): string {
   return value
+    .replace(
+      /("(?:password|token|api[_-]?key|cookie|authorization)"\s*:\s*)"(?:\\.|[^"\\])*"/gi,
+      '$1"[REDACTED]"',
+    )
     .replace(/\bBearer\s+[^\s"']+/gi, 'Bearer [REDACTED]')
     .replace(/\bsk-[\w-]+/g, '[REDACTED_KEY]')
     .replace(
@@ -22,7 +26,11 @@ export function validatePlan(plan: Plan, requirements: Requirement[]): string[] 
     const title = scenario.title.toLowerCase().trim();
     if (titles.has(title)) errors.push(`Duplicate title ${scenario.title}`);
     titles.add(title);
-    if (!scenario.steps.length || !scenario.expected.trim())
+    if (
+      !scenario.steps.length ||
+      scenario.steps.some((step) => !step.trim()) ||
+      !scenario.expected.trim()
+    )
       errors.push(`Missing executable intent ${scenario.id}`);
   }
   for (const requirement of requirements) {
@@ -53,6 +61,15 @@ export function inspectDraft(code: string): string[] {
     /\b(eval|Function|process|require|fetch|XMLHttpRequest|WebSocket|exec|spawn|writeFile|readFile|waitForTimeout|storageState|addInitScript|evaluate|route|skip|fixme|only)\b/;
   if (forbidden.test(code)) errors.push('Forbidden execution, bypass, or flaky-wait construct');
   if (/https?:\/\//.test(code)) errors.push('External destinations are not allowed');
+  const diagnostics =
+    ts.transpileModule(code, {
+      reportDiagnostics: true,
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+    }).diagnostics ?? [];
+  if (diagnostics.some((d) => d.category === ts.DiagnosticCategory.Error))
+    errors.push('Draft has syntax errors');
+  let approvedImport = false;
+  let meaningfulAssertions = 0;
   let assertions = 0;
   let tests = 0;
   const visit = (node: ts.Node) => {
@@ -63,15 +80,38 @@ export function inspectDraft(code: string): string[] {
       )
         errors.push('Only the approved fixture import is allowed');
     }
+    if (
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      node.moduleSpecifier.text === '../src/fixtures/commerce'
+    )
+      approvedImport = true;
+    if (ts.isTryStatement(node) && node.catchClause)
+      errors.push('Draft cannot swallow assertion failures');
     if (ts.isCallExpression(node)) {
       if (node.expression.kind === ts.SyntaxKind.ImportKeyword)
         errors.push('Dynamic import is not allowed');
-      if (ts.isIdentifier(node.expression) && node.expression.text === 'expect') assertions++;
+      if (ts.isIdentifier(node.expression) && node.expression.text === 'expect') {
+        assertions++;
+        const argument = node.arguments[0];
+        if (
+          argument &&
+          !(
+            ts.isLiteralExpression(argument) ||
+            argument.kind === ts.SyntaxKind.TrueKeyword ||
+            argument.kind === ts.SyntaxKind.FalseKeyword ||
+            argument.kind === ts.SyntaxKind.NullKeyword
+          )
+        )
+          meaningfulAssertions++;
+      }
       if (ts.isIdentifier(node.expression) && node.expression.text === 'test') tests++;
     }
     ts.forEachChild(node, visit);
   };
   visit(source);
+  if (!approvedImport) errors.push('Draft must import the approved fixtures');
+  if (assertions && !meaningfulAssertions) errors.push('Draft contains only constant assertions');
   if (!assertions || !tests) errors.push('Draft needs test cases and explicit assertions');
   return errors;
 }

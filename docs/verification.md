@@ -1,22 +1,24 @@
-# Local verification — November 6, 2026
+# Local verification — version two, November 6, 2026
 
-| Check                                       | Observed result                              |
-| ------------------------------------------- | -------------------------------------------- |
-| TypeScript, ESLint, Prettier                | Passed                                       |
-| Commerce API and security                   | 32 passed                                    |
-| AI framework/provider/guardrail regression  | 26 passed                                    |
-| Chromium browser journeys and accessibility | 16 passed                                    |
-| Firefox browser journeys and accessibility  | 16 passed                                    |
-| WebKit browser journeys and accessibility   | 16 passed                                    |
-| Pixel 7 Chromium emulation                  | 16 passed                                    |
-| Dashboard and interactive AI Studio         | 5 passed                                     |
-| macOS visual baseline comparison            | 1 passed after visual inspection             |
-| Dependency advisory audit                   | 0 known vulnerabilities at verification time |
+The expanded main suite passed **232 executions** representing **154 distinct scenarios** across API/security/concurrency, AI framework and four browser/device projects. Five separate Studio scenarios and one visual scenario bring the active inventory to **160 distinct tests** and **238 executions** across release checks. Generated candidates are never included in these totals.
 
-The main suite has **122 executions** across six projects, with zero failures, skipped cases or flaky outcomes. Dashboard checks and the visual comparison are separate: **128 passing executions across these runs**, not 128 unique business scenarios. The full main run took approximately 17 seconds on this machine; timing is not a performance guarantee.
+| Area                                               | Main executions |
+| -------------------------------------------------- | --------------: |
+| API/security/concurrency                           |              77 |
+| AI guardrails, compiler, oracle and seeded defects |              51 |
+| Chromium                                           |              26 |
+| Firefox                                            |              26 |
+| WebKit                                             |              26 |
+| Pixel 7 Chromium emulation                         |              26 |
 
-Evidence is available in `artifacts/quality.json`, `artifacts/showcase-tests.json`, `artifacts/visual-results.json`, `test-results/results.json` and the HTML report. Screenshots in `docs/images/` were captured from the running implementation, not design mockups.
+Ten curated pricing defects were detected by independent authored assertions against injected faulty HTTP applications. This is not an exhaustive mutation score or evidence that pending model drafts have run.
 
-The five AI demo artifacts passed the validation pipeline using explicitly authored offline examples. The live OpenAI adapter was contract-tested using a mocked SDK. No real model completion, hosted GitHub Actions build, Docker execution, Linux visual baseline or production deployment is claimed by this local record. Those environments require their own verification.
+Current machine-readable evidence is in `artifacts/quality.json`, `artifacts/ai-evaluation.json`, `artifacts/showcase-tests.json` and `artifacts/visual-results.json`. These are generated, ignored artifacts. The live generation record will identify its model, API response ID, usage, validation and review status when a successful call is made. Offline examples must not be described as live results.
 
-Earlier public-demo specs and clients are retained for reference. The active configuration explicitly excludes the three old specs (`login.spec.ts`, `cart.spec.ts`, `posts.spec.ts`) in the original checkout and selects the new commerce suites. The copied `.legacy.ts` files are also outside the `.spec.ts` selection.
+AWS project-invariant checks passed; formal CloudFormation schema/compliance validation was left pending at the user's request. No AWS resources were deployed. Version-two sharding is configured but hosted execution must be verified separately. Docker execution and a Linux visual baseline have not been verified here.
+
+## Live generation status
+
+API-key authentication and model-list access were verified, and GPT-6 Luna was configured locally. The first real generation request returned HTTP 429 because the API account had no credits remaining. No live-generated candidate result or live execution is claimed. The user explicitly deferred further live generation and billing setup. The key remains in the ignored local `.env`; it is not part of this release.
+
+The three-report CI merge flow was rehearsed locally: 51 AI checks plus functional shards of 91 and 90 executions merged into a complete passing 232-execution report. Hosted version-two CI results must be assessed separately.

@@ -60,12 +60,34 @@ export const impactSchema = z
     runFullSuite: z.boolean(),
   })
   .strict();
+export const generatedCasesSchema = z
+  .object({
+    cases: z
+      .array(
+        z
+          .object({
+            id: z.string().min(1),
+            title: z.string().min(1),
+            requirementId: z.string(),
+            productId: z.string(),
+            quantity: z.union([z.number(), z.string(), z.null()]),
+            expectedStatus: z.number().int(),
+            expectedTotal: z.number().int().nonnegative(),
+          })
+          .strict(),
+      )
+      .min(10)
+      .max(20),
+  })
+  .strict();
+export type GeneratedCases = z.infer<typeof generatedCasesSchema>;
 export const schemas = {
   plan: planSchema,
   draft: draftSchema,
   triage: triageSchema,
   locator: locatorSchema,
   impact: impactSchema,
+  cases: generatedCasesSchema,
 };
 export type Task = keyof typeof schemas;
 export type Plan = z.infer<typeof planSchema>;
