@@ -20,3 +20,36 @@ test.describe('Posts API', () => {
     expect(body.id).toBeDefined();
   });
 });
+
+test('missing post returns 404 and an empty response object', async ({ postsClient }) => {
+  const response = await postsClient.getPost(999999);
+  expect(response.status()).toBe(404);
+  expect(await response.json()).toEqual({});
+});
+
+test('post response identifies the requested resource and JSON content type', async ({
+  postsClient,
+}) => {
+  const response = await postsClient.getPost(2);
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('application/json');
+  const post = postSchema.parse(await response.json());
+  expect(post.id).toBe(2);
+});
+
+test('contract rejects malformed and incomplete response bodies', () => {
+  const valid = { userId: 1, id: 1, title: 'Demo', body: 'Content' };
+  expect(postSchema.safeParse(valid).success).toBe(true);
+  for (const invalid of [
+    null,
+    {},
+    [],
+    { ...valid, id: '1' },
+    { ...valid, id: -1 },
+    { ...valid, userId: 0 },
+    { ...valid, title: '' },
+    { ...valid, body: '' },
+  ]) {
+    expect(postSchema.safeParse(invalid).success).toBe(false);
+  }
+});

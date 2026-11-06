@@ -17,3 +17,11 @@ test.describe('Login', () => {
     await expect(loginPage.loginButton).toBeVisible();
   });
 });
+
+test('locked-out user remains on the login page', async ({ page, loginPage }) => {
+  await loginPage.goto();
+  await loginPage.login('locked_out_user', 'secret_sauce');
+  await loginPage.expectError('Sorry, this user has been locked out.');
+  await expect(loginPage.loginButton).toBeVisible();
+  await expect(page).not.toHaveURL(/inventory\.html/);
+});
