@@ -50,7 +50,8 @@
     "verify:v4": "npm run quality && npm run contract:check && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:postgres && npm run test:showcase",
     "showcase:launch": "node --import tsx scripts/launch-showcase.ts",
     "showcase:replay": "node --import tsx scripts/replay-showcase.ts",
-    "verify:v5": "npm run quality && npm run contract:check && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:postgres && npm run test:showcase"
+    "verify:v5": "npm run quality && npm run contract:check && npm test && npm run ai:demo && npm run ai:candidates && npm run ai:evaluate && npm run test:postgres && npm run test:showcase",
+    "showcase:record": "node --import tsx scripts/record-showcase.ts"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^13.1.0",
