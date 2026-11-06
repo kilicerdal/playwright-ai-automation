@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { requirementSchema, type Task } from '../src/ai/contracts';
 import { OfflineProvider } from '../src/ai/offline';
 import { runTask } from '../src/ai/pipeline';
+import { journeys } from '../src/journeys/examples';
+import { sessionSchema, runJourneySession, demoFaults } from '../src/showcase/journey-session';
 const port = Number(process.env.SHOWCASE_PORT ?? 4174);
 const origin = `http://127.0.0.1:${port}`;
 const schema = z
@@ -18,6 +20,7 @@ const requirements = z
   .array(requirementSchema)
   .parse(JSON.parse(await readFile('requirements/commerce.json', 'utf8')));
 let busy = false;
+let journeyBusy = false;
 const liveCalls = 0;
 const server = createServer(async (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -29,6 +32,82 @@ const server = createServer(async (req, res) => {
   };
   if (req.headers.host !== `127.0.0.1:${port}`)
     return json(403, { error: 'Use the loopback address printed by the server' });
+  if ((req.url === '/showtime.js' || req.url === '/showtime.css') && req.method === 'GET') {
+    const file = req.url.slice(1);
+    const content = await readFile(new URL('../src/showcase/public/' + file, import.meta.url));
+    res.writeHead(200, { 'Content-Type': file.endsWith('.js') ? 'text/javascript' : 'text/css' });
+    res.end(content);
+    return;
+  }
+  if (req.url === '/api/showcase/health' && req.method === 'GET')
+    return json(200, {
+      service: 'eai-showcase',
+      version: '5.0.0',
+      policy: 'local-only',
+      journeyBusy,
+    });
+  if (req.url === '/api/journeys' && req.method === 'GET')
+    return json(200, {
+      journeys: journeys.map(({ id, title, requirement, origin, steps }) => ({
+        id,
+        title,
+        requirement,
+        origin,
+        stepCount: steps.length,
+      })),
+      faults: demoFaults,
+      modelCalls: 0,
+    });
+  if (req.url === '/api/journeys/run' && req.method === 'POST') {
+    if (
+      req.headers.origin !== origin ||
+      !req.headers['content-type']?.startsWith('application/json')
+    )
+      return json(403, { error: 'Same-origin JSON requests required' });
+    if (journeyBusy) return json(409, { error: 'A local journey is already running' });
+    let acquired = false;
+    try {
+      let body = '';
+      for await (const chunk of req) {
+        body += chunk;
+        if (body.length > 2048) return json(413, { error: 'Request too large' });
+      }
+      let value: unknown;
+      try {
+        value = JSON.parse(body);
+      } catch {
+        return json(400, { error: 'Invalid JSON' });
+      }
+      const parsed = sessionSchema.safeParse(value);
+      if (!parsed.success)
+        return json(422, {
+          error: 'Choose an included authored journey and an allowed simulated fault',
+        });
+      if (journeyBusy) return json(409, { error: 'A local journey is already running' });
+      journeyBusy = acquired = true;
+      res.writeHead(200, { 'Content-Type': 'application/x-ndjson; charset=utf-8' });
+      const emit = (event: unknown) => {
+        if (!res.destroyed) res.write(JSON.stringify(event) + '\n');
+      };
+      try {
+        const report = await runJourneySession(parsed.data, emit);
+        emit({ type: 'finished', report });
+      } catch {
+        emit({
+          type: 'error',
+          message:
+            'Local execution unavailable or control failed. No fault-detection credit awarded. Check the local PostgreSQL lab and retry.',
+        });
+      }
+      res.end();
+    } catch {
+      if (!res.headersSent) json(400, { error: 'Request interrupted' });
+      else res.end();
+    } finally {
+      if (acquired) journeyBusy = false;
+    }
+    return;
+  }
   if (req.url === '/api/ai/status' && req.method === 'GET')
     return json(200, {
       liveAvailable: false,

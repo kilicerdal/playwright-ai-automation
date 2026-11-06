@@ -1,0 +1,139 @@
+.showtime-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.showtime-actions,
+.tour-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.showtime-button {
+  font: inherit;
+  font-size: 13px;
+  padding: 12px 16px;
+  border: 1px solid #64718a;
+  border-radius: 8px;
+  background: #182436;
+  color: #edf2fb;
+  cursor: pointer;
+}
+.showtime-button.primary {
+  background: #d7ff84;
+  color: #16200c;
+  border-color: #d7ff84;
+  font-weight: 600;
+}
+.showtime-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.showtime-button:focus-visible,
+.showtime-form select:focus-visible {
+  outline: 3px solid #d7ff84;
+  outline-offset: 4px;
+}
+.showtime-form {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0;
+}
+.showtime-form label {
+  font-size: 13px;
+  color: #c5d4ec;
+}
+.showtime-form select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 12px;
+  border: 1px solid #64718a;
+  border-radius: 6px;
+  background: #0c1420;
+  color: #edf2fb;
+  font: inherit;
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+.showtime-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.showtime-grid .card {
+  min-width: 0;
+}
+.tour-progress {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #d7ff84;
+}
+#tour-title {
+  font-size: 26px;
+  letter-spacing: -0.5px;
+}
+#tour-body {
+  color: #c5d4ec;
+  font-size: 15px;
+  line-height: 1.8;
+}
+#tour-proof {
+  border-left: 2px solid #a3c3ff;
+  padding-left: 16px;
+}
+.journey-steps {
+  padding-left: 25px;
+  font-size: 12px;
+  line-height: 1.8;
+  max-height: 330px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+.journey-steps li {
+  padding: 8px 4px;
+  border-bottom: 1px solid #293344;
+}
+.step-passed {
+  color: #d7ff84;
+}
+.step-diverged,
+#journey-run-error {
+  color: #ffc7b9;
+}
+#journey-result {
+  margin-top: 20px;
+}
+#journey-result h2 {
+  color: #d7ff84;
+}
+#journey-run-identity {
+  overflow-wrap: anywhere;
+}
+.presenting .shell {
+  display: block;
+}
+.presenting aside,
+.presenting .topbar,
+.presenting .footer {
+  display: none;
+}
+.presenting main {
+  max-width: 1500px;
+  margin: auto;
+}
+@media (max-width: 900px) {
+  .showtime-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+}

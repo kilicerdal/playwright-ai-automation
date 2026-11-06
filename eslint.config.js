@@ -20,6 +20,9 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.node } },
     rules: { '@typescript-eslint/no-explicit-any': 'error' },
   },
-  { files: ['demo/public/*.js'], languageOptions: { globals: globals.browser } },
+  {
+    files: ['demo/public/*.js', 'src/showcase/public/*.js'],
+    languageOptions: { globals: globals.browser },
+  },
   prettier,
 );

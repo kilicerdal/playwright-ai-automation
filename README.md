@@ -6,6 +6,17 @@ A complete, reproducible commerce journey paired with an AI engineering workbenc
 
 ![Quality Intelligence command center](docs/images/quality-command-center.png)
 
+## Version five — the guided showcase
+
+V5 adds a real-time local journey runner, a five-step presentation guide, controlled fault demonstrations, safe downloadable evidence, and a single launcher. [V5 setup and walkthrough](docs/version-five.md).
+
+```bash
+npm run showcase:launch
+# Open http://127.0.0.1:4174/#showtime
+```
+
+Requires installed Node.js 22+, project dependencies, Playwright browser binaries for browser tests, and PostgreSQL binaries for the local lab. The launcher checks and reuses compatible services; it never installs packages, downloads a model, calls paid APIs, or deploys cloud resources. It builds the dashboard from existing test evidence; run `npm run verify:v5` for fresh release results.
+
 ## Version four — local journey intelligence
 
 V4 runs eight authored customer journeys through a constrained, typed plan interpreter and an independent reference model. It exercises nine actual non-pricing faults against isolated PostgreSQL applications, including ownership leaks, duplicate checkout, retained carts, and incorrect stock restoration. The dashboard links each requirement and journey hash to step-by-step expected and observed results. [V4 design and setup](docs/version-four.md).

@@ -85,7 +85,19 @@ function injectFault(store: PgCommerceStore, fault: Fault) {
     };
   }
 }
-export async function executeJourney(journey: Journey, fault?: Fault) {
+export type StepEvidence = {
+  index: number;
+  action: string;
+  actor: string;
+  expected: Observation;
+  actual: Observation;
+  passed: boolean;
+};
+export async function executeJourney(
+  journey: Journey,
+  fault?: Fault,
+  onStep?: (step: StepEvidence) => void,
+) {
   const compiled = compileJourney(journey); // Reject unsafe/invalid plans before opening a database.
   const connectionString = process.env.TEST_DATABASE_URL ?? localDatabaseURL;
   const url = new URL(connectionString);
@@ -107,7 +119,7 @@ export async function executeJourney(journey: Journey, fault?: Fault) {
     const baseURL = `http://127.0.0.1:${address.port}`;
     for (const [index, { step, expected }] of compiled.entries()) {
       const actor = step.actor;
-      contexts[actor] ??= await request.newContext({ baseURL });
+      contexts[actor] ??= await request.newContext({ baseURL, timeout: 5000 });
       const context = contexts[actor]!;
       const headers: Record<string, string> = {
         'X-CSRF-Token': 'csrf' in step && !step.csrf ? 'deliberately-invalid' : (csrf[actor] ?? ''),
@@ -167,7 +179,16 @@ export async function executeJourney(journey: Journey, fault?: Fault) {
             )
           : actual[key as keyof Observation] === value,
       );
-      observations.push({ index: index + 1, action: step.action, actor, expected, actual, passed });
+      const observation = {
+        index: index + 1,
+        action: step.action,
+        actor,
+        expected,
+        actual,
+        passed,
+      };
+      observations.push(observation);
+      onStep?.(observation);
       // Stop after a divergence: later states cannot be interpreted against the control model.
       if (!passed) break;
     }
