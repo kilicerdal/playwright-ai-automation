@@ -1,16 +1,30 @@
-name: Playwright Tests
+name: Quality Engineering
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
-
 permissions:
-  contents: write
-
+  contents: read
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run quality
+      - run: npm audit --audit-level=moderate
   test:
+    needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -20,67 +34,25 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox
-      - run: npm run quality
-      - run: npm test
-        env:
-          UI_BASE_URL: https://www.saucedemo.com
-          API_BASE_URL: https://jsonplaceholder.typicode.com
-          TEST_USERNAME: standard_user
-          TEST_PASSWORD: secret_sauce
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Browser, API, accessibility, security and AI guardrail suites
+        run: npm test
+      - name: Build authored AI examples and evidence report
+        if: always()
+        run: npm run ai:demo && npm run showcase:build
+      - name: Verify interactive showcase
+        if: success()
+        run: npm run test:showcase
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 14
-
-      - name: Upload structured test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-test-results
+          name: quality-evidence-${{ github.run_id }}
           path: |
-            test-results/results.json
-            test-results/junit.xml
-          retention-days: 30
-          if-no-files-found: warn
-
-      - name: Publish test intelligence metrics
+            playwright-report/
+            test-results/
+            artifacts/
+            showcase/
+          retention-days: 14
+      - name: Job summary
         if: always()
-        env:
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          python3 - <<'PYCODE'
-          import json
-          import os
-          from pathlib import Path
-
-          source = Path("test-results/results.json")
-          if not source.exists():
-              print("No test results available; keeping previous metrics.")
-              raise SystemExit(0)
-
-          stats = json.loads(source.read_text())["stats"]
-
-          summary = {
-              "total": sum(stats[k] for k in ("expected", "unexpected", "skipped", "flaky")),
-              "passed": stats["expected"],
-              "failed": stats["unexpected"],
-              "skipped": stats["skipped"],
-              "flaky": stats["flaky"],
-              "duration": stats["duration"],
-              "updatedAt": stats["startTime"],
-              "runUrl": os.environ["RUN_URL"],
-          }
-
-          destination = Path("docs/test-metrics.json")
-          destination.parent.mkdir(exist_ok=True)
-          destination.write_text(json.dumps(summary, indent=2) + "\n")
-          PYCODE
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/test-metrics.json
-          git diff --cached --quiet || git commit -m "Update verified Playwright test metrics"
-          git push
+        run: node scripts/ci-summary.mjs >> "$GITHUB_STEP_SUMMARY"

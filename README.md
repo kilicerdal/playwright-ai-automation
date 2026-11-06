@@ -1,71 +1,127 @@
-# Playwright AI Automation
+# eAI Quality Intelligence
 
-A production-style learning project for modern SDET practices using **Playwright + TypeScript**. It demonstrates UI, API, and end-to-end automation plus CI quality gates and disciplined AI-assisted engineering with Claude Code / GitHub Copilot.
+**An AI-native Playwright engineering showcase by Erdal Kilic.**
 
-> AI tools help develop and review the framework; they are not required to execute tests.
+A complete, reproducible commerce journey paired with an AI engineering workbench. Explore risk-based planning, guarded test generation, evidence-grounded failure investigation, locator proposals, and change-impact analysis—then inspect the deterministic tests that keep those proposals accountable.
 
-## What it demonstrates
+![Quality Intelligence command center](docs/images/quality-command-center.png)
 
-- Playwright UI and API automation
-- TypeScript with strict checking
-- Page Objects and custom fixtures
-- API clients and Zod contract validation
-- Deterministic test-data builders
-- Smoke tagging, parallel execution, retries in CI
-- Failure traces, screenshots, video, HTML and JUnit reports
-- GitHub Actions quality gates
-- Docker execution
-- Claude Code project instructions
+## Experience it in five minutes
 
-## Quick start
+Requires **Node.js 22+** and npm. No API key is needed for the suite or authored demo.
 
 ```bash
-npm install
-npx playwright install
+npm ci
+npx playwright install --with-deps chromium firefox webkit
+npm run verify
+npm run showcase
+```
+
+Open **http://127.0.0.1:4174**. Explore the command center, run an offline task in **AI engineering lab → Interactive AI Studio**, search test results, and follow requirement-to-test mappings.
+
+To browse the application under test separately:
+
+```bash
+npm run demo:app
+# http://127.0.0.1:4173 — account: demo / demo-pass
+```
+
+![Atlas commerce sandbox](docs/images/atlas-commerce.png)
+
+## What the showcase demonstrates
+
+| Area                    | Working implementation                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| AI planning             | Requirement retrieval, risk scenarios, requirement-ID and coverage-shape validation                             |
+| AI generation           | Structured Playwright drafts, static review checks, quarantined output                                          |
+| AI investigation        | Evidence citations, uncertainty, hypotheses and next checks                                                     |
+| AI maintenance          | Review-only locator suggestions; advisory change-impact selection                                               |
+| AI reliability          | Strict schemas, two-attempt limit, provider timeout, token accounting, prompt version and input hash            |
+| Functional automation   | UI, API and end-to-end checkout workflows; API-based browser setup                                              |
+| Data and authentication | Session isolation, rotation, invalidation, CSRF, strict payload contracts                                       |
+| Reliability             | Concurrency/idempotency tests, HTTP failure recovery, lost-response retry                                       |
+| Browser coverage        | Chromium, Firefox, WebKit and Pixel 7 emulation                                                                 |
+| Accessibility           | Automated WCAG-tagged axe scans and keyboard-only login                                                         |
+| Visual regression       | Separate explicit snapshot suite and baseline-review workflow                                                   |
+| Reporting               | HTML, JUnit, JSON, traces, screenshots, video, requirement mapping and interactive results                      |
+| Delivery                | Read-only GitHub Actions permissions, quality/audit gate, evidence artifacts, Docker recipe, dependency updates |
+
+## Use a real AI model
+
+```bash
 cp .env.example .env
-npm test
+# In .env, set OPENAI_API_KEY and AI_MODEL to a model available to your project.
+npm run ai:live
+npm run showcase:build
+npm run showcase
 ```
 
-Run focused suites:
+The Studio also supports individual live tasks after the server loads those environment variables. Live calls use OpenAI's Responses API and structured output. They can incur API charges. A Studio session permits ten live tasks, each with at most two model calls; CLI runs make five tasks with the same two-attempt bound.
 
-```bash
-npm run test:ui
-npm run test:api
-npm run test:e2e
-npm run test:smoke
+**Offline mode is explicitly authored example output.** It does not call a model or interpret the question. Live mode never silently falls back to examples. The adapter is contract-tested with a mocked SDK; a live end-to-end run requires credentials and account access.
+
+A plan passing the gates establishes structure, references, and required coverage categories. It does **not** prove every scenario is correct. Generated code is never executed automatically. Static review checks are not a sandbox. [Read the AI design and limits](docs/ai-workflow.md).
+
+## Commands
+
+| Command                                                  | Purpose                                                                       |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run verify`                                         | Typecheck, lint, formatting, full suite, offline AI artifacts, showcase tests |
+| `npm test`                                               | API, security, AI framework, and four browser/device targets                  |
+| `npm run test:smoke`                                     | Fast API + Chromium business checks                                           |
+| `npm run test:api`                                       | API and security suites                                                       |
+| `npm run test:a11y`                                      | Chromium accessibility checks                                                 |
+| `npm run test:resilience`                                | Network failure and lost-response cases                                       |
+| `npm run test:framework`                                 | AI provider contracts and guardrail regression cases                          |
+| `npm run test:visual:update`                             | Create/update the current platform's reviewed baseline                        |
+| `npm run test:visual`                                    | Compare against that baseline                                                 |
+| `npm run ai:demo`                                        | Build five explicitly authored AI examples                                    |
+| `npm run ai:live`                                        | Run five real model tasks; requires credentials                               |
+| `npm run ai:live -- --results=test-results/results.json` | Investigate actual Playwright evidence instead of the synthetic incident      |
+| `npm run report`                                         | Open the detailed Playwright HTML report                                      |
+| `npm run showcase`                                       | Serve the results dashboard and interactive AI Studio                         |
+
+## Architecture
+
+```mermaid
+flowchart LR
+  R[Versioned requirements] --> G[Retrieval and grounded context]
+  G --> M[Offline examples or live model]
+  M --> V[Schema and semantic gates]
+  V --> H[Human-reviewed proposals]
+  S[Authored specs] --> F[Isolated fixtures]
+  F --> P[Page objects and API client]
+  P --> A[Local commerce app]
+  A --> E[Execution evidence]
+  E --> D[Quality dashboard]
+  V --> D
 ```
-
-Quality checks:
-
-```bash
-npm run quality
-```
-
-Open the latest HTML report:
-
-```bash
-npm run report
-```
-
-## Structure
 
 ```text
-src/pages          UI interaction models
-src/fixtures       Playwright custom fixtures
-src/api            API clients, models and schemas
-src/data/builders  Deterministic test data
-tests/ui           UI-focused tests
-tests/api          API-focused tests
-tests/e2e          Business workflow tests
-docs               Architecture, strategy and AI workflow
-.github/workflows  CI pipelines
-CLAUDE.md           Claude Code project guidance
+demo/                     Local commerce UI and HTTP API
+requirements/             Versioned business requirements
+src/ai/                   Providers, task contracts, gates and retrieval
+src/api/                  Typed API client and response contracts
+src/fixtures/             Per-test authentication and browser setup
+src/pages/                User-oriented browser interactions
+src/reporters/            Retry-aware quality and requirement evidence
+tests/                    API, security, UI, E2E, resilience, accessibility, visual, AI, Studio
+scripts/                  AI CLI, report builder, local Studio server, CI summary
+artifacts/                Generated evidence and quarantined drafts (ignored)
+showcase/                 Portable generated HTML report (ignored)
 ```
 
-## Learning roadmap
+## Walk through the engineering
 
-After the framework runs locally, study it in this order: test specs → locators/assertions → async/await → TypeScript types → Page Objects → fixtures → API clients → schema validation → configuration → CI → Docker → Claude Code/Copilot workflow.
+- [Seven-minute demonstration](docs/showcase-guide.md)
+- [Architecture and decisions](docs/architecture.md)
+- [Test strategy and visual baselines](docs/test-strategy.md)
+- [AI workflow, controls and limitations](docs/ai-workflow.md)
+- [Setup, troubleshooting and maintenance](docs/runbook.md)
+- [Verification record](docs/verification.md)
 
-## Important note
+## Scope and honesty
 
-The public demo systems used here are for learning. A real enterprise framework would point to approved non-production environments and use organization-specific secrets, test-data controls, and service contracts.
+This is a portfolio reference implementation of enterprise engineering patterns. The demo uses in-memory state, one public demo identity, per-session simulated stock and orders, and no payments. It is intended for loopback access; do not expose the demo or Studio publicly. It is not a production commerce system, penetration test, accessibility certification, or load-test certification. A real enterprise rollout adds durable storage, real identity and permissions, managed secrets, approved environments, retention policies, observability and organization-specific security review.
+
+Results shown in the dashboard come from local artifacts. Browser/device repetitions count as separate executions. Passing checks do not mean exhaustive coverage. Docker and hosted GitHub Actions require separate execution in those environments; local verification does not establish a hosted green build.

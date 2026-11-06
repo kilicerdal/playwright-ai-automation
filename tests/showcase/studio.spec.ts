@@ -1,0 +1,57 @@
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+test('navigation, result search, and offline AI Studio work', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /Confidence, engineered/ })).toBeVisible();
+  await page.getByRole('button', { name: /AI engineering lab/ }).click();
+  await expect(page.getByRole('heading', { name: 'Interactive AI Studio' })).toBeVisible();
+  await page.getByLabel('AI task', { exact: true }).selectOption('draft');
+  await page.getByRole('button', { name: 'Run validated AI task →', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('Authored examples');
+  await expect(page.locator('#studio-result')).toContainText('checkout retry preserves one order');
+  await page.getByRole('button', { name: /Test explorer/ }).click();
+  await page.getByLabel('Filter test results').fill('no-test-can-match-this');
+  await expect(page.getByText('No matching tests.')).toBeVisible();
+});
+test('dashboard accessibility and mobile layout', async ({ page }) => {
+  await page.goto('/');
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: /AI engineering lab/ }).click();
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+});
+test('Studio rejects cross-origin requests', async ({ request }) => {
+  const response = await request.post('/api/ai/run', {
+    headers: { Origin: 'https://untrusted.example' },
+    data: { task: 'plan', mode: 'offline', question: 'Plan tests' },
+  });
+  expect(response.status()).toBe(403);
+});
+test('Studio validates input before model invocation', async ({ request }) => {
+  const response = await request.post('/api/ai/run', {
+    headers: { Origin: 'http://127.0.0.1:4174' },
+    data: { task: 'execute-shell', mode: 'offline', question: 'bad' },
+  });
+  expect(response.status()).toBe(422);
+});
+test('Studio status exposes availability without credentials', async ({ request }) => {
+  const response = await request.get('/api/ai/status');
+  const body = await response.json();
+  expect(response.status()).toBe(200);
+  expect(typeof body.liveAvailable).toBe('boolean');
+  expect(body).not.toHaveProperty('apiKey');
+  expect(body.limit).toBe(10);
+});

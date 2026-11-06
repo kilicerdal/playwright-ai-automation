@@ -1,0 +1,30 @@
+[
+  {
+    "id": "AUTH-01",
+    "text": "Only demo/demo-pass can sign in. Invalid credentials return 401. Protected cart and order endpoints require a session. Sign out invalidates it."
+  },
+  {
+    "id": "CAT-01",
+    "text": "GET /api/products supports case-insensitive q search and category filtering. Products contain integer prices in cents and stock."
+  },
+  {
+    "id": "CART-01",
+    "text": "POST /api/cart accepts productId and integer quantity 1..20. Unknown products return 404, insufficient stock returns 409, invalid quantities return 422. Carts are isolated per session."
+  },
+  {
+    "id": "ORDER-01",
+    "text": "POST /api/orders requires name (2..80 characters), address (5..200 characters), and Idempotency-Key (8..100 alphanumeric/hyphen characters). Empty carts return 422. Valid checkout returns 201, clears cart, and preserves authoritative catalog prices."
+  },
+  {
+    "id": "ORDER-02",
+    "text": "Repeating the same idempotency key with the same shipping payload returns the existing order (200). Reusing it with a different payload returns 409. Concurrent identical requests create exactly one order."
+  },
+  {
+    "id": "SEC-01",
+    "text": "Mutations require a session-bound X-CSRF-Token. Cross-origin mutations are rejected with 403. Session cookies are HttpOnly and SameSite=Strict. Another session cannot read an order (404)."
+  },
+  {
+    "id": "UX-01",
+    "text": "The shopping journey supports keyboard operation and 390px mobile screens. Sold-out items cannot be added. Search empty states, checkout errors, and confirmation are announced. Cart survives page reload."
+  }
+]

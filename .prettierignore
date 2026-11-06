@@ -1,3 +1,7 @@
 node_modules
 playwright-report
 test-results
+artifacts
+/showcase/
+package-lock.json
+*.png

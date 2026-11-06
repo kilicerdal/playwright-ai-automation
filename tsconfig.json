@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
@@ -10,5 +10,13 @@
     "noEmit": true,
     "types": ["node", "@playwright/test"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts"]
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "playwright.config.ts",
+    "demo/**/*.ts",
+    "scripts/**/*.ts",
+    "playwright.showcase.config.ts",
+    "playwright.visual.config.ts"
+  ]
 }

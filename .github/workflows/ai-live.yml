@@ -1,0 +1,33 @@
+name: Live AI Evaluation
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Model ID available to your OpenAI project
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  ai:
+    # A repository environment can enforce reviewer approval and spend controls.
+    environment: ai-showcase
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run ai:live
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_MODEL: ${{ inputs.model }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-ai-evidence
+          path: artifacts/
+          retention-days: 7
