@@ -1,0 +1,19 @@
+WEBVTT
+
+00:00:00.166 --> 00:00:06.247
+First, the unmodified application passes the healthy control. Then 12 targeted source mutations challenge the same business expectations.
+
+00:00:06.247 --> 00:00:12.249
+Before: the stock-deduction mutation survives the status-only test. This is an authored learning example, separate from the complete campaign.
+
+00:00:12.249 --> 00:00:18.261
+Improve the test by adding one business assertion: after buying 2 units from stock 8, expect stock 6. Keep the application mutation unchanged.
+
+00:00:18.261 --> 00:00:24.376
+Rerun: the same mutation is detected. Both healthy controls pass; the mutated application hash is identical before and after.
+
+00:00:24.376 --> 00:00:31.424
+Inspect the exact source change and the actual Playwright failure. A timeout or database error earns no detection credit.
+
+00:00:31.424 --> 00:00:38.912
+Reproduce everything locally with the documented commands. No paid services, uploads, or hosted CI. Targeted results do not prove defect-free software.

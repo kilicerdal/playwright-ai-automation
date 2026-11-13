@@ -4,7 +4,9 @@
 
 Run a real customer journey, reveal a controlled defect, and inspect evidence someone else can reproduce. V5 combines a guided presentation, streamed API observations, PostgreSQL commerce, and guarded AI workflow contracts.
 
-**Current policy: local execution only.** Journey plans and AI examples are authored offline fixtures. Live model APIs, AWS uploads, and the five project GitHub Actions workflows are disabled. No API key is needed.
+**New: [inventory and pricing mutation testing](#local-source-mutation-testing).** Follow a surviving mutation through an assertion improvement, inspect six inventory and six pricing defects, and watch the captioned local walkthrough.
+
+**Current policy: local execution only.** Journey plans and AI examples are authored offline fixtures. Live model APIs, AWS uploads, and the five project GitHub Actions workflows are disabled. GitHub Actions is also disabled at the repository level. No API key is needed.
 
 [![V5 guided local showcase](docs/images/v5-showcase.png)](https://github.com/kilicerdal/playwright-ai-automation/releases/download/v5.0.0/v5-showcase-demo.webm)
 
@@ -52,20 +54,21 @@ The fault runs in a separate disposable schema after the healthy control passes.
 
 ![V5 controlled fault evidence](docs/images/v5-fault-evidence.png)
 
-## Verified release scope
+## Verified local scope
 
-The local V5 release check passed **301 test executions**, representing **223 distinct test scenarios**:
+The mutation-testing update passed **320 test executions** in a complete local `npm run verify:v5` run:
 
 | Suite                                                            | Executions |
 | ---------------------------------------------------------------- | ---------: |
-| Main API, security, AI contracts and four browser/device targets |        238 |
-| PostgreSQL integration and journey evaluation                    |         51 |
-| Showcase UI, streaming, evidence export and request guards       |         11 |
-| Visual regression                                                |          1 |
+| Main API, security, AI contracts and four browser/device targets |        245 |
+| PostgreSQL integration and journey evaluation                    |         60 |
+| Showcase UI, mutation evidence, streaming and request guards     |         15 |
 
-The main run includes 77 API/security scenarios, 57 framework scenarios, and 26 browser scenarios repeated across Chromium, Firefox, WebKit and Pixel 7 emulation. Separate local evidence records eight authored journey controls detecting nine curated non-pricing faults, plus the earlier ten curated pricing faults. Nested mutation observations are not added to active test counts.
+The separate mutation campaign detected **6/6 inventory** and **6/6 pricing** source mutations. Its authored learning example first records a surviving mutation, then detects the same mutation after adding a stock assertion. Both healthy controls pass, and the mutated source hashes match. Nested mutation runs are not added to the 320-test total.
 
-These are local results. V5 hosted workflows were deliberately disabled; no hosted V5 green run, exhaustive mutation coverage, or accessibility certification is claimed. [Verification details](docs/verification.md).
+The published v5.0.0 baseline previously recorded 301 executions, including a visual regression check. The existing platform-specific visual baseline was not changed or rerun for this update. Eight authored journey controls and the earlier curated pricing faults remain separate evidence.
+
+These are local results. GitHub Actions and hosted project workflows are disabled; no hosted green run, exhaustive mutation coverage, or accessibility certification is claimed. [Verification history](docs/verification.md) · [Mutation scope and reproduction](docs/local-mutation-testing.md).
 
 ## What is implemented
 
@@ -78,6 +81,7 @@ These are local results. V5 hosted workflows were deliberately disabled; no host
 | AI workflow contracts | Grounded planning, quarantined drafts, cited investigation, review-only locator proposals and advisory impact selection       |
 | AI boundaries         | Strict schemas, independent oracles, source/bundle hashes, human-attested candidate review; no generated JavaScript execution |
 | Browser checks        | Four browser/device targets, selected axe scans, keyboard journeys, explicit visual baseline                                  |
+| Mutation testing      | Twelve targeted source changes, separate inventory/pricing results, and a survivor-to-detected assertion example              |
 | Evidence              | HTML, JUnit, JSON, retained failure traces, content hashes and reproducible execution records                                 |
 | Delivery definitions  | Archived sharded GitHub workflows and optional AWS template; execution/upload disabled                                        |
 
@@ -85,24 +89,28 @@ These are local results. V5 hosted workflows were deliberately disabled; no host
 
 AI helped develop this project. That is separate from a live model generating tests at runtime. Current examples are **authored offline fixtures** and are labeled that way. They do not interpret an arbitrary question or establish model quality.
 
+`npm run verify` runs the complete `verify:v5` local checks, including mutation evidence generation before the showcase tests. Start the disposable PostgreSQL lab first.
+
 Live CLI commands reject execution, the Studio returns 403 for live requests, and the default OpenAI provider fails before constructing a network client. Mocked SDK contract tests remain local. Saved `.env` credentials stay ignored and are not used for live execution. AWS and hosted project workflows remain disabled even if old secrets exist. Re-enabling paid or hosted services requires deliberate changes and fresh authorization.
 
 These are project controls, not an operating-system network sandbox or a guarantee about unrelated account activity. This application is intended for loopback use. Do not expose its synthetic demo accounts or local runner publicly.
 
 ## Useful commands
 
-| Command                                                                 | Purpose                                                         |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `npm run showcase:launch`                                               | Launch the local lab, commerce app and dashboard                |
-| `npm run showcase:launch -- --check`                                    | Check startup and clean up owned resources                      |
-| `npm run verify:v5`                                                     | Full local release checks and refreshed evidence                |
-| `npm run test:visual`                                                   | Check the existing platform visual baseline                     |
-| `npm run showcase:replay -- --journey=J-CANCEL --fault=missing-restock` | Reproduce a controlled divergence                               |
-| `npm run journeys:evaluate`                                             | Run all authored journey controls and curated faults            |
-| `npm run ai:demo`                                                       | Produce labeled authored AI workflow examples                   |
-| `npm run ai:candidates`                                                 | Validate and quarantine authored candidate examples             |
-| `npm run showcase:record`                                               | Record the actual local UI with the existing Playwright encoder |
-| `npm run report`                                                        | Open the detailed Playwright report                             |
+| Command                                                                 | Purpose                                                                  |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `npm run showcase:launch`                                               | Launch the local lab, commerce app and dashboard                         |
+| `npm run showcase:launch -- --check`                                    | Check startup and clean up owned resources                               |
+| `npm run verify:v5`                                                     | Full local release checks and refreshed evidence                         |
+| `npm run test:visual`                                                   | Check the existing platform visual baseline                              |
+| `npm run showcase:replay -- --journey=J-CANCEL --fault=missing-restock` | Reproduce a controlled divergence                                        |
+| `npm run journeys:evaluate`                                             | Run all authored journey controls and curated faults                     |
+| `npm run ai:demo`                                                       | Produce labeled authored AI workflow examples                            |
+| `npm run ai:candidates`                                                 | Validate and quarantine authored candidate examples                      |
+| `npm run showcase:record`                                               | Record the actual local UI with the existing Playwright encoder          |
+| `npm run test:mutation`                                                 | Run the local inventory/pricing mutations and assertion improvement demo |
+| `npm run showcase:record-mutation`                                      | Record the mutation walkthrough locally with captions                    |
+| `npm run report`                                                        | Open the detailed Playwright report                                      |
 
 ## Design and history
 
@@ -113,3 +121,33 @@ These are project controls, not an operating-system network sandbox or a guarant
 - [Architecture](docs/architecture.md), [test strategy](docs/test-strategy.md), and [AI workflow design](docs/ai-workflow.md)
 
 Older documents describe earlier capabilities; the current zero-spend policy overrides their live API and deployment instructions. This is a portfolio reference implementation, with synthetic identities and simulated payments/refunds. Production adoption needs real identity and authorization, managed secrets, operational controls, workload testing, and organization-specific review.
+
+## Local source mutation testing
+
+Run `npm run db:local:start`, then `npm run test:mutation` to challenge inventory and pricing assertions with twelve targeted source mutations against local PostgreSQL. The healthy control runs first; survivors and execution errors fail the command. HTML/Markdown/JSON evidence is written under `artifacts/mutation/`. No live models, uploads, deployment, or hosted CI are used. See [the local mutation guide](docs/local-mutation-testing.md) for scope, reproduction, and limitations.
+
+### See why the assertion matters
+
+![Mutation testing: healthy baseline, source mutations, and weak versus strong checks](docs/images/mutation-testing.png)
+
+[Watch the local walkthrough](docs/media/mutation-walkthrough.webm) · [Captions](docs/media/mutation-walkthrough.vtt) · [Reproduction and scope](docs/local-mutation-testing.md)
+
+The demonstration removes checkout's inventory deduction. A status-only Playwright check still passes on HTTP 201. A stronger check catches the defect: expected stock **6**, observed **8**. Both variants pass against the healthy application first. This is actual local PostgreSQL/Playwright evidence, not a simulated dashboard result.
+
+After running the mutation campaign, build the showcase and open its **Mutation testing** section:
+
+```sh
+npm run showcase:build
+npm run showcase
+# http://127.0.0.1:4174/#mutations
+```
+
+The tab presents the report snapshot, source replacements and actual assertion failures. Missing, invalid or source-stale evidence is shown without success counts. To recapture the silent walkthrough with captions while the showcase is running, use `npm run showcase:record-mutation`, then rebuild the showcase. No model calls or external services are involved.
+
+### From surviving to detected
+
+The Mutation testing tab also follows one authored learning example through three steps: the stock-deduction mutation **survives** a status-only test, a persisted-stock assertion is added, then the **same mutation is detected**. Each test version first passes its healthy control, and matching source hashes show that the application mutation did not change. This comparison is separate from the full campaign totals.
+
+![Surviving mutation, added assertion, and detected defect](docs/images/mutation-recovery.png)
+
+Inventory and pricing results are shown separately. Mutation titles describe the business defect, while expandable details retain technical IDs, source changes and actual failure evidence.

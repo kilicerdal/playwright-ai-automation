@@ -39,6 +39,23 @@ const server = createServer(async (req, res) => {
     res.end(content);
     return;
   }
+  if (
+    ['/mutation-walkthrough.webm', '/mutation-walkthrough.vtt'].includes(req.url ?? '') &&
+    req.method === 'GET'
+  ) {
+    try {
+      const video = await readFile(
+        req.url === '/mutation-walkthrough.webm'
+          ? 'docs/media/mutation-walkthrough.webm'
+          : 'docs/media/mutation-walkthrough.vtt',
+      );
+      res.writeHead(200, { 'Content-Type': req.url?.endsWith('.vtt') ? 'text/vtt' : 'video/webm' });
+      res.end(video);
+    } catch {
+      json(404, { error: 'Local recording not captured yet' });
+    }
+    return;
+  }
   if (req.url === '/api/showcase/health' && req.method === 'GET')
     return json(200, {
       service: 'eai-showcase',
