@@ -13,6 +13,11 @@ test('same-key multi-line checkout replay preserves prices after catalog changes
   const firstResponse = await buyer.checkout(key);
   expect(firstResponse.status()).toBe(201);
   const order = await firstResponse.json();
+  expect(order.total, 'Initial checkout total pricing').toBe(23200);
+  expect(order.items, 'Initial checkout item pricing').toEqual([
+    { productId: 'atlas-pack', quantity: 2, unitPrice: 8900 },
+    { productId: 'field-notebook', quantity: 3, unitPrice: 1800 },
+  ]);
 
   await db.store.pool.query("UPDATE inventory SET price=9900 WHERE id='atlas-pack'");
   await db.store.pool.query("UPDATE inventory SET price=2500 WHERE id='field-notebook'");
