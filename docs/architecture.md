@@ -1,6 +1,30 @@
 # Architecture and engineering decisions
 
-## Two systems, separate boundaries
+## Current V5 system boundaries
+
+```mermaid
+flowchart LR
+  Specs[Playwright specs and isolated fixtures] --> Client[HTTP clients and page objects]
+  Client --> Memory[In memory commerce on port 4173]
+  Client --> Durable[Durable commerce HTTP service]
+  Durable --> DB[(Loopback PostgreSQL)]
+  Specs --> Reporter[Executed result reporters]
+  Mutations[Disposable source mutation campaign] --> Durable
+  Mutations --> Evidence[Separate mutation evidence]
+  Reporter --> Reports[Local JSON HTML and JUnit]
+  Evidence --> View[Showcase on port 4174]
+  Reports --> View
+  Authored[Authored offline AI fixtures] --> Gates[Schema grounding and review gates]
+  Gates --> Quarantine[Drafts outside testDir]
+```
+
+The current checkout includes both the isolated in-memory application and a durable PostgreSQL commerce implementation. The latter owns shared inventory, persisted price snapshots, transactional checkout and replay behavior. Source mutations run in disposable copies against the local database lab; their observations are separate from the main test execution count. Specs own assertions, while clients and pages own interactions.
+
+The showcase reads recorded evidence and streams explicitly selected local journeys. It does not infer that a model ran or that a hosted workflow passed. Live model calls, cloud uploads and all project hosted workflows remain disabled. Current execution evidence is linked in [verification history](verification.md) and the [mutation guide](local-mutation-testing.md).
+
+## Original in memory design
+
+The following decisions describe the original in-memory service and explain its limits. They do not describe the later shared PostgreSQL implementation.
 
 **Atlas Commerce** is the deterministic application under test, served on loopback port 4173. It implements a real HTTP session, catalog, cart and checkout workflow. The HTTP API uses strict input validation, integer cents, session-bound CSRF tokens and idempotency keys. There is no dependency on a public demo site.
 
@@ -32,11 +56,11 @@
 | Full suite after impact advice  | Avoid model-driven coverage gaps                             | Selection is advisory, not a CI optimization          |
 | Explicit visual suite           | Make baseline approval deliberate                            | Baselines vary by platform and need review            |
 
-## CI and evidence
+## Archived CI design
 
-The quality job runs type checking, ESLint, formatting and the dependency advisory gate. The test job installs browsers and executes suites with `forbidOnly` and failure on flaky tests. HTML/JUnit/JSON reports, failure artifacts, AI examples and the showcase are uploaded even on test failure. CI does not write metrics back to main, use repository write permissions or send secrets to pull request code.
+The archived quality job defines type checking, ESLint, formatting and a dependency advisory gate. Its test job defines browser installation and suites with `forbidOnly` and failure on flaky tests, plus report uploads. These definitions are disabled in the current zero-spend setup; they are not evidence that hosted V5 execution or uploads occurred.
 
-The manually dispatched live-AI workflow uses a named GitHub environment. Repository owners can configure environment reviewers and supply an environment-scoped `OPENAI_API_KEY`. These settings are not automatically created by the YAML.
+The archived live-AI workflow describes a named GitHub environment, but runtime calls are disabled in the current project. Re-enabling paid providers or hosted services requires deliberate implementation changes and fresh authorization.
 
 ## Production adoption
 
