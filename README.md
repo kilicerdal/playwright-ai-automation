@@ -151,3 +151,7 @@ The Mutation testing tab also follows one authored learning example through thre
 ![Surviving mutation, added assertion, and detected defect](docs/images/mutation-recovery.png)
 
 Inventory and pricing results are shown separately. Mutation titles describe the business defect, while expandable details retain technical IDs, source changes and actual failure evidence.
+
+## License
+
+No open-source license has been granted for this project's original code. It is published for portfolio review; public visibility does not grant a general reuse license. Third-party dependencies retain their own licenses.
