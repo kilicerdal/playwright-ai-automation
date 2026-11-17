@@ -1,6 +1,7 @@
 {
   "name": "playwright-ai-automation",
   "version": "5.0.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "description": "AI-native quality engineering showcase: grounded planning, guarded generation, failure investigation and deterministic commerce automation.",
