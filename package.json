@@ -72,7 +72,7 @@
     "globals": "^17.14.0",
     "openai": "^7.52.0",
     "pg": "^8.23.1",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "tsx": "^4.23.15",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.72.1",
