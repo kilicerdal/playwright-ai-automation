@@ -56,15 +56,15 @@ The fault runs in a separate disposable schema after the healthy control passes.
 
 ## Verified local scope
 
-The mutation-testing update passed **320 test executions** in a complete local `npm run verify:v5` run:
+The November 17, 2026 [mutation showcase release](https://github.com/kilicerdal/playwright-ai-automation/releases/tag/mutation-showcase-2026-11-17) passed **322 test executions** in a complete local `npm run verify` run on commit `e628893da5802213b4188bfcb8ddffa0ae86786b`:
 
 | Suite                                                            | Executions |
 | ---------------------------------------------------------------- | ---------: |
 | Main API, security, AI contracts and four browser/device targets |        245 |
-| PostgreSQL integration and journey evaluation                    |         60 |
+| PostgreSQL integration and journey evaluation                    |         62 |
 | Showcase UI, mutation evidence, streaming and request guards     |         15 |
 
-The separate mutation campaign detected **6/6 inventory** and **6/6 pricing** source mutations. Its authored learning example first records a surviving mutation, then detects the same mutation after adding a stock assertion. Both healthy controls pass, and the mutated source hashes match. Nested mutation runs are not added to the 320-test total.
+The separate mutation campaign detected **6/6 inventory** and **6/6 pricing** source mutations. Its authored learning example first records a surviving mutation, then detects the same mutation after adding a stock assertion. Both healthy controls pass, and the mutated source hashes match. Nested mutation runs are not added to the 322-test total.
 
 The published v5.0.0 baseline previously recorded 301 executions, including a visual regression check. The existing platform-specific visual baseline was not changed or rerun for this update. Eight authored journey controls and the earlier curated pricing faults remain separate evidence.
 
@@ -151,6 +151,10 @@ The Mutation testing tab also follows one authored learning example through thre
 ![Surviving mutation, added assertion, and detected defect](docs/images/mutation-recovery.png)
 
 Inventory and pricing results are shown separately. Mutation titles describe the business defect, while expandable details retain technical IDs, source changes and actual failure evidence.
+
+## Contributing and maintenance
+
+[Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md) · [Dependency maintenance](docs/DEPENDENCY_MAINTENANCE.md).
 
 ## License
 

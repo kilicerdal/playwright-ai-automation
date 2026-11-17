@@ -1,5 +1,15 @@
 # V5 verification record
 
+## Latest recorded verification: November 17, 2026
+
+The [mutation showcase release](https://github.com/kilicerdal/playwright-ai-automation/releases/tag/mutation-showcase-2026-11-17) records a passing local `npm run verify` on exact commit `e628893da5802213b4188bfcb8ddffa0ae86786b`: **322 executions** (245 main, 62 PostgreSQL, 15 showcase), with zero failures or skips. The separate campaign detected 6/6 inventory and 6/6 pricing source mutations. Its nested runs are not added to the 322 total.
+
+[Release verification JSON](https://github.com/kilicerdal/playwright-ai-automation/releases/download/mutation-showcase-2026-11-17/release-commit-verification.json) · [Release checksums](https://github.com/kilicerdal/playwright-ai-automation/releases/download/mutation-showcase-2026-11-17/RELEASE-SHA256SUMS.txt) · [Mutation methodology](local-mutation-testing.md).
+
+This is recorded local evidence, not a new hosted run. The earlier visual baseline was not rerun for that update. Later documentation or license commits do not imply a fresh execution of the suite.
+
+## Historical V5 baseline: November 6, 2026
+
 The V5 release was verified locally on macOS on November 6, 2026. `npm run verify:v5` and the separate visual suite passed **301 test executions** across **223 distinct test scenarios**.
 
 | Area                                                         | Executions | Distinct scenarios |
