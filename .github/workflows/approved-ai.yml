@@ -52,7 +52,7 @@ jobs:
         run: |
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN}" > /tmp/source-run.json
           node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('/tmp/source-run.json')); if(r.head_sha!==process.env.EXPECTED_SHA || r.conclusion!=='success' || !r.path.endsWith('ai-live.yml')) throw new Error('Source run must be successful live generation for this exact commit');"
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: live-ai-evidence
           path: artifacts
