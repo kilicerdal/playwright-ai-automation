@@ -1,12 +1,15 @@
 # eAI Quality Intelligence
 
+[![Offline checks](https://github.com/kilicerdal/playwright-ai-automation/actions/workflows/offline-ci.yml/badge.svg?branch=main)](https://github.com/kilicerdal/playwright-ai-automation/actions/workflows/offline-ci.yml)
+![Node 22+](https://img.shields.io/badge/Node-22%2B-339933?logo=nodedotjs) ![Tests: Playwright](https://img.shields.io/badge/Tests-Playwright-2EAD33) [![MIT license](https://img.shields.io/github/license/kilicerdal/playwright-ai-automation)](LICENSE)
+
 **A local Playwright quality engineering showcase by Erdal Kilic.**
 
 Run a real customer journey, reveal a controlled defect, and inspect evidence someone else can reproduce. V5 combines a guided presentation, streamed API observations, PostgreSQL commerce, and guarded AI workflow contracts.
 
 **New: [inventory and pricing mutation testing](#local-source-mutation-testing).** Follow a surviving mutation through an assertion improvement, inspect six inventory and six pricing defects, and watch the captioned local walkthrough.
 
-**Current policy: local execution only.** Journey plans and AI examples are authored offline fixtures. Live model APIs, AWS uploads, and the five project GitHub Actions workflows are disabled. GitHub Actions is also disabled at the repository level. No API key is needed.
+**Current policy: offline validation.** Journey plans and AI examples are authored offline fixtures. The dedicated offline CI workflow checks the same deterministic behavior using a disposable PostgreSQL service. Live model APIs and AWS uploads remain disabled, as do the five archived workflows. No API key is needed.
 
 [![V5 guided local showcase](docs/images/v5-showcase.png)](https://github.com/kilicerdal/playwright-ai-automation/releases/download/v5.0.0/v5-showcase-demo.webm)
 
@@ -68,7 +71,7 @@ The separate mutation campaign detected **6/6 inventory** and **6/6 pricing** so
 
 The published v5.0.0 baseline previously recorded 301 executions, including a visual regression check. The existing platform-specific visual baseline was not changed or rerun for this update. Eight authored journey controls and the earlier curated pricing faults remain separate evidence.
 
-These are local results. GitHub Actions and hosted project workflows are disabled; no hosted green run, exhaustive mutation coverage, or accessibility certification is claimed. [Verification history](docs/verification.md) · [Mutation scope and reproduction](docs/local-mutation-testing.md).
+These counts describe the dated local release. Current hosted offline results are separate and linked by the CI badge above; neither establishes exhaustive mutation coverage or accessibility certification. [Verification history](docs/verification.md) · [Mutation scope and reproduction](docs/local-mutation-testing.md).
 
 ## What is implemented
 
@@ -83,7 +86,7 @@ These are local results. GitHub Actions and hosted project workflows are disable
 | Browser checks        | Four browser/device targets, selected axe scans, keyboard journeys, explicit visual baseline                                  |
 | Mutation testing      | Twelve targeted source changes, separate inventory/pricing results, and a survivor-to-detected assertion example              |
 | Evidence              | HTML, JUnit, JSON, retained failure traces, content hashes and reproducible execution records                                 |
-| Delivery definitions  | Archived sharded GitHub workflows and optional AWS template; execution/upload disabled                                        |
+| Delivery definitions  | Dedicated offline CI plus archived sharded/live-AI/AWS definitions; live services and AWS upload disabled                     |
 
 ## AI provenance and zero-spend policy
 
@@ -91,7 +94,7 @@ AI helped develop this project. That is separate from a live model generating te
 
 `npm run verify` runs the complete `verify:v5` local checks, including mutation evidence generation before the showcase tests. Start the disposable PostgreSQL lab first.
 
-Live CLI commands reject execution, the Studio returns 403 for live requests, and the default OpenAI provider fails before constructing a network client. Mocked SDK contract tests remain local. Saved `.env` credentials stay ignored and are not used for live execution. AWS and hosted project workflows remain disabled even if old secrets exist. Re-enabling paid or hosted services requires deliberate changes and fresh authorization.
+Live CLI commands reject execution, the Studio returns 403 for live requests, and the default OpenAI provider fails before constructing a network client. Mocked SDK contract tests can run locally or in the offline workflow. Saved `.env` credentials stay ignored and are not used for live execution. AWS uploads and the five archived workflows remain disabled even if old secrets exist. The offline workflow receives no provider credentials. Re-enabling live providers or AWS operations requires separate authorization.
 
 These are project controls, not an operating-system network sandbox or a guarantee about unrelated account activity. This application is intended for loopback use. Do not expose its synthetic demo accounts or local runner publicly.
 
@@ -124,7 +127,7 @@ Older documents describe earlier capabilities; the current zero-spend policy ove
 
 ## Local source mutation testing
 
-Run `npm run db:local:start`, then `npm run test:mutation` to challenge inventory and pricing assertions with twelve targeted source mutations against local PostgreSQL. The healthy control runs first; survivors and execution errors fail the command. HTML/Markdown/JSON evidence is written under `artifacts/mutation/`. No live models, uploads, deployment, or hosted CI are used. See [the local mutation guide](docs/local-mutation-testing.md) for scope, reproduction, and limitations.
+Run `npm run db:local:start`, then `npm run test:mutation` to challenge inventory and pricing assertions with twelve targeted source mutations against local PostgreSQL. The healthy control runs first; survivors and execution errors fail the command. HTML/Markdown/JSON evidence is written under `artifacts/mutation/`. No live models, AWS uploads or deployment are used. Hosted execution requires the dedicated offline workflow and explicit mutation authorization. See [the local mutation guide](docs/local-mutation-testing.md) for scope, reproduction, and limitations.
 
 ### See why the assertion matters
 
@@ -159,3 +162,7 @@ Inventory and pricing results are shown separately. Mutation titles describe the
 ## License
 
 This project's original code is licensed under the [MIT License](LICENSE), copyright (c) 2026 Erdal Kilic. Third-party dependencies and separately attributed materials retain their own licenses.
+
+## Compatibility and maintenance
+
+[Supported versions, quick/full checks, dependency decisions and upgrade policy](docs/MAINTENANCE.md). Historical evidence stays dated; current CI status is linked above.

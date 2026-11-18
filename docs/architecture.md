@@ -20,7 +20,7 @@ flowchart LR
 
 The current checkout includes both the isolated in-memory application and a durable PostgreSQL commerce implementation. The latter owns shared inventory, persisted price snapshots, transactional checkout and replay behavior. Source mutations run in disposable copies against the local database lab; their observations are separate from the main test execution count. Specs own assertions, while clients and pages own interactions.
 
-The showcase reads recorded evidence and streams explicitly selected local journeys. It does not infer that a model ran or that a hosted workflow passed. Live model calls, cloud uploads and all project hosted workflows remain disabled. Current execution evidence is linked in [verification history](verification.md) and the [mutation guide](local-mutation-testing.md).
+The showcase reads recorded evidence and streams explicitly selected local journeys. It does not infer that a model ran or that a hosted workflow passed. Live model calls and AWS uploads remain disabled. A separate offline workflow validates deterministic behavior without provider credentials. Current execution evidence is linked in [verification history](verification.md) and the [mutation guide](local-mutation-testing.md).
 
 ## Original in memory design
 
@@ -56,11 +56,13 @@ The following decisions describe the original in-memory service and explain its 
 | Full suite after impact advice  | Avoid model-driven coverage gaps                             | Selection is advisory, not a CI optimization          |
 | Explicit visual suite           | Make baseline approval deliberate                            | Baselines vary by platform and need review            |
 
-## Archived CI design
+## Offline CI and archived designs
 
-The archived quality job defines type checking, ESLint, formatting and a dependency advisory gate. Its test job defines browser installation and suites with `forbidOnly` and failure on flaky tests, plus report uploads. These definitions are disabled in the current zero-spend setup; they are not evidence that hosted V5 execution or uploads occurred.
+The active [offline workflow](../.github/workflows/offline-ci.yml) runs quality checks, API/browser suites, disposable PostgreSQL integration, explicit offline mutation execution and showcase checks. It uses read-only repository permissions and retains synthetic evidence for seven days. It does not execute live models or upload to AWS.
 
-The archived live-AI workflow describes a named GitHub environment, but runtime calls are disabled in the current project. Re-enabling paid providers or hosted services requires deliberate implementation changes and fresh authorization.
+The archived quality job defines type checking, ESLint, formatting and a dependency advisory gate. Its test job defines browser installation and suites with `forbidOnly` and failure on flaky tests, plus report uploads. Those older definitions remain disabled; their existence is not evidence that they executed. The new offline workflow is a separate run history.
+
+The archived live-AI workflow describes a named GitHub environment, but runtime calls are disabled in the current project. Re-enabling paid providers or AWS operations requires deliberate implementation changes and separate authorization.
 
 ## Production adoption
 

@@ -16,7 +16,7 @@ npm run test:mutation -- --mutant=inventory-skip-restock
 
 Open `artifacts/mutation/report.html` for an offline evidence viewer, or read `report.md` / `report.json`. The HTML report embeds no external assets or scripts and shows the actual assertion messages beside each source change. Per-run Playwright JSON and logs contain assertion names, expected values and observed values. Reports are ignored by Git. Temporary source copies are removed in a finally block; an interrupted/killed process may leave an ignored `artifacts/mutation/work-*` directory. Tests use disposable `eai_test_*` schemas and clean them up on ordinary completion.
 
-The command refuses CI execution, forces the project's loopback demo database, uses loopback HTTP servers, and does not load `.env` files, call models, upload artifacts, deploy, or enable hosted workflows. Cost: $0. It neither starts nor stops a database automatically; stop a lab you started with `npm run db:local:stop`.
+The command refuses CI execution unless `ALLOW_OFFLINE_CI_MUTATIONS=1` explicitly authorizes the dedicated offline runner. It forces the project's loopback demo database, uses loopback HTTP servers, and does not load `.env` files, call models, upload to external services, or deploy. The authorized workflow can retain generated evidence as GitHub Actions artifacts; no model or AWS operations occur. It neither starts nor stops a database automatically; stop a lab you started with `npm run db:local:stop`.
 
 ## What is checked
 

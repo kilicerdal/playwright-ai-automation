@@ -1,3 +1,4 @@
+import { mutationExecutionPolicy } from '../src/mutations/execution-policy';
 import { mutationDescription } from '../src/mutations/catalog';
 import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
@@ -7,7 +8,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { classifyMutation, type MutationTestResult } from './mutation-results';
 import { localDatabaseURL } from '../src/db/store';
 
-if (process.env.CI) throw new Error('Mutation testing is local-only; hosted CI is disabled.');
+const executionPolicy = mutationExecutionPolicy(process.env);
 const root = resolve('.');
 const output = join(root, 'artifacts/mutation');
 await mkdir(output, { recursive: true });
@@ -263,7 +264,8 @@ try {
     generatedAt: new Date().toISOString(),
     sourceSHA256: createHash('sha256').update(original).digest('hex'),
     scope: `${results.length} targeted source mutations in PostgreSQL inventory and pricing; not exhaustive mutation coverage.`,
-    execution: 'Local loopback HTTP and PostgreSQL only; no model calls, uploads or hosted CI.',
+    execution: executionPolicy.description,
+    executionMode: executionPolicy.mode,
     baseline,
     demonstration,
     recovery,
@@ -276,7 +278,7 @@ try {
   await writeFile(join(output, 'report.json'), JSON.stringify(summary, null, 2) + '\n');
   await writeFile(
     join(output, 'report.md'),
-    `# Local inventory and pricing mutation report\n\nGenerated: ${summary.generatedAt}\n\nHealthy baseline: ${baseline.tests.length}/${baseline.tests.length} passed.\n\nKilled: ${summary.killed}; survived: ${summary.survived}; execution errors: ${summary.errors}; total: ${summary.total}.\n\n${summary.scope}\n\n| Mutation | Outcome | Failing assertion scenario |\n| --- | --- | --- |\n${results
+    `# Inventory and pricing mutation report\n\nExecution: ${summary.execution}\n\nGenerated: ${summary.generatedAt}\n\nHealthy baseline: ${baseline.tests.length}/${baseline.tests.length} passed.\n\nKilled: ${summary.killed}; survived: ${summary.survived}; execution errors: ${summary.errors}; total: ${summary.total}.\n\n${summary.scope}\n\n| Mutation | Outcome | Failing assertion scenario |\n| --- | --- | --- |\n${results
       .map(
         (r) =>
           `| ${r.label} (${r.id}, ${r.category}) | ${r.outcome} | ${r.tests
@@ -317,7 +319,7 @@ try {
       .replaceAll('"', '&quot;');
   await writeFile(
     join(output, 'report.html'),
-    `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Inventory and pricing mutation evidence</title><style>body{font:17px system-ui;max-width:1000px;margin:40px auto;padding:0 24px;color:#182638;background:#f6f8fb}article{background:white;padding:20px;margin:16px 0;border:1px solid #ccd5df;border-radius:10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;padding:16px;font-size:14px}h1{line-height:1.2}code{overflow-wrap:anywhere}</style><main><h1>Do the tests catch deliberate defects?</h1><p>Healthy control: ${baseline.tests.length} passed. Detected: ${summary.killed}. Survived: ${summary.survived}. Execution errors: ${summary.errors}.</p><p>${escape(summary.scope)} All execution was local. No uploads, model calls, or hosted CI.</p><p>Generated: ${escape(summary.generatedAt)}</p><h2>Results by business area</h2>${categories.map((c) => `<p>${c.category}: ${c.detected}/${c.tested} detected; ${c.survived} survived; ${c.errors} execution errors.</p>`).join('')}<h2>From surviving to detected</h2><p>Authored teaching comparison, separate from the full campaign. Healthy controls pass. The same stock-deduction mutation survives the status-only check, then is detected after the stock assertion is added.</p><pre>${escape(recovery.assertionAdded)}</pre>${results
+    `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Inventory and pricing mutation evidence</title><style>body{font:17px system-ui;max-width:1000px;margin:40px auto;padding:0 24px;color:#182638;background:#f6f8fb}article{background:white;padding:20px;margin:16px 0;border:1px solid #ccd5df;border-radius:10px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eef2f6;padding:16px;font-size:14px}h1{line-height:1.2}code{overflow-wrap:anywhere}</style><main><h1>Do the tests catch deliberate defects?</h1><p>Healthy control: ${baseline.tests.length} passed. Detected: ${summary.killed}. Survived: ${summary.survived}. Execution errors: ${summary.errors}.</p><p>${escape(summary.scope)} ${escape(summary.execution)}</p><p>Generated: ${escape(summary.generatedAt)}</p><h2>Results by business area</h2>${categories.map((c) => `<p>${c.category}: ${c.detected}/${c.tested} detected; ${c.survived} survived; ${c.errors} execution errors.</p>`).join('')}<h2>From surviving to detected</h2><p>Authored teaching comparison, separate from the full campaign. Healthy controls pass. The same stock-deduction mutation survives the status-only check, then is detected after the stock assertion is added.</p><pre>${escape(recovery.assertionAdded)}</pre>${results
       .map(
         (r) =>
           `<article><h2>${escape(r.label)}: ${escape(r.outcome)}</h2><p>${escape(r.category)} · <code>${escape(r.id)}</code></p><p><code>${escape(r.original)}</code><br>changed to<br><code>${escape(r.replacement)}</code></p>${r.tests
