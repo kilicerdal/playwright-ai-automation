@@ -2,6 +2,10 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    # Keep typings within the documented Node 22 runtime floor.
+    ignore:
+      - dependency-name: '@types/node'
+        versions: ['>=23.0.0']
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
