@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 test('navigation, result search, and offline AI Studio work', async ({ page }) => {
   await page.goto('/');
+  const policy = page
+    .locator('.metric')
+    .filter({ has: page.getByText('EXECUTION POLICY', { exact: true }) });
+  await expect(policy.locator('.value')).toHaveText('Offline');
+  await expect(policy.locator('small')).toHaveText('Live APIs and AWS uploads disabled');
   await expect(page.getByRole('heading', { name: /Confidence, engineered/ })).toBeVisible();
   await page.getByRole('button', { name: /AI engineering lab/ }).click();
   await expect(page.getByRole('heading', { name: 'Interactive AI Studio' })).toBeVisible();
