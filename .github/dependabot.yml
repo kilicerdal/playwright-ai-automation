@@ -11,5 +11,12 @@ updates:
     open-pull-requests-limit: 5
   - package-ecosystem: github-actions
     directory: /
+    # Historical definitions stay disabled; reactivate only after a fresh review.
+    exclude-paths:
+      - '/.github/workflows/ai-live.yml'
+      - '/.github/workflows/approved-ai.yml'
+      - '/.github/workflows/aws-report-archive.yml'
+      - '/.github/workflows/playwright.yml'
+      - '/.github/workflows/quality-gate.yml'
     schedule:
       interval: monthly

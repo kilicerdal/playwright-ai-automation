@@ -49,3 +49,5 @@ A green CI badge describes that workflow's current result, not a security, acces
 ## Known development-tool advisory
 
 The 2026-11-17 audit found the upstream picomatch advisory [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf) in development tooling, with no compatible patched release listed at that review. The offline CI badge is not a vulnerability-scan badge. Recheck npm audit during dependency review; do not force unrelated framework downgrades merely to remove an advisory count.
+
+Archived workflow definitions are excluded from automatic Actions updates because they do not execute. Reactivating one requires reviewing its action versions, permissions and costs first. The active offline workflow remains covered by monthly Actions updates.
