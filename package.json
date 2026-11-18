@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "AI-native quality engineering showcase: grounded planning, guarded generation, failure investigation and deterministic commerce automation.",
+  "description": "Local Playwright quality-engineering showcase with deterministic commerce assertions and guarded authored AI-workflow examples.",
   "scripts": {
     "test": "playwright test --project=api --project=framework --project=chromium --project=firefox --project=webkit --project=mobile-chrome",
     "test:ui": "playwright test tests/ui --project=chromium",
@@ -55,7 +55,8 @@
     "showcase:record": "node --import tsx scripts/record-showcase.ts",
     "showcase:capture-checkout": "node --import tsx scripts/capture-checkout-scenarios.ts",
     "test:mutation": "node --import tsx scripts/mutation-test.ts",
-    "showcase:record-mutation": "node --import tsx scripts/record-mutation.ts"
+    "showcase:record-mutation": "node --import tsx scripts/record-mutation.ts",
+    "doctor": "node --import tsx scripts/doctor.ts"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^13.1.0",

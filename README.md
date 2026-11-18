@@ -3,7 +3,9 @@
 [![Offline checks](https://github.com/kilicerdal/playwright-ai-automation/actions/workflows/offline-ci.yml/badge.svg?branch=main)](https://github.com/kilicerdal/playwright-ai-automation/actions/workflows/offline-ci.yml)
 ![Node 22+](https://img.shields.io/badge/Node-22%2B-339933?logo=nodedotjs) ![Tests: Playwright](https://img.shields.io/badge/Tests-Playwright-2EAD33) [![MIT license](https://img.shields.io/github/license/kilicerdal/playwright-ai-automation)](LICENSE)
 
-**A local Playwright quality engineering showcase by Erdal Kilic.**
+**Review in five minutes:** [What to run, which failure to inspect, and what it proves](docs/REVIEWER_GUIDE.md) · [Evidence provenance](docs/EVIDENCE.md).
+
+**A local Playwright quality engineering showcase with guarded, authored AI-workflow examples, by Erdal Kilic.**
 
 Run a real customer journey, reveal a controlled defect, and inspect evidence someone else can reproduce. V5 combines a guided presentation, streamed API observations, PostgreSQL commerce, and guarded AI workflow contracts.
 
@@ -15,7 +17,7 @@ Run a real customer journey, reveal a controlled defect, and inspect evidence so
 
 [Watch or download the short demo](https://github.com/kilicerdal/playwright-ai-automation/releases/download/v5.0.0/v5-showcase-demo.webm) · [V5 release](https://github.com/kilicerdal/playwright-ai-automation/releases/tag/v5.0.0) · [Five-minute walkthrough script](docs/v5-walkthrough.md)
 
-The silent recording captures actual local browser execution. It includes a healthy control, a simulated stock-restoration fault, its observed mismatch, and evidence export. Pauses pace the recording; they do not simulate execution progress.
+**Recorded local v5.0.0 evidence, not the current CI result.** The silent recording captures actual local browser execution. It includes a healthy control, a simulated stock-restoration fault, its observed mismatch, and evidence export. Pauses pace the recording; they do not simulate execution progress.
 
 ## Start locally
 
@@ -24,6 +26,7 @@ Prerequisites: Node.js 22+, npm, PostgreSQL binaries on PATH (or `PG_BIN_DIR`), 
 ```bash
 npm ci
 npx playwright install chromium firefox webkit
+npm run doctor
 npm run showcase:launch
 ```
 
@@ -56,6 +59,8 @@ npm run showcase:replay -- --journey=J-CANCEL --fault=missing-restock
 The fault runs in a separate disposable schema after the healthy control passes. It does not corrupt the ordinary commerce demo. Results distinguish a passed control, a detected fault, and a fault that the selected journey misses. Infrastructure failures receive no defect-detection credit.
 
 ![V5 controlled fault evidence](docs/images/v5-fault-evidence.png)
+
+_Historical local V5 recording; reproduce with the journey above. [Evidence inventory](docs/EVIDENCE.md)._
 
 ## Verified local scope
 
@@ -133,6 +138,8 @@ Run `npm run db:local:start`, then `npm run test:mutation` to challenge inventor
 
 ![Mutation testing: healthy baseline, source mutations, and weak versus strong checks](docs/images/mutation-testing.png)
 
+_Recorded local mutation release, November 17, 2026; not a fresh hosted run._
+
 [Watch the local walkthrough](docs/media/mutation-walkthrough.webm) · [Captions](docs/media/mutation-walkthrough.vtt) · [Reproduction and scope](docs/local-mutation-testing.md)
 
 The demonstration removes checkout's inventory deduction. A status-only Playwright check still passes on HTTP 201. A stronger check catches the defect: expected stock **6**, observed **8**. Both variants pass against the healthy application first. This is actual local PostgreSQL/Playwright evidence, not a simulated dashboard result.
@@ -152,6 +159,8 @@ The tab presents the report snapshot, source replacements and actual assertion f
 The Mutation testing tab also follows one authored learning example through three steps: the stock-deduction mutation **survives** a status-only test, a persisted-stock assertion is added, then the **same mutation is detected**. Each test version first passes its healthy control, and matching source hashes show that the application mutation did not change. This comparison is separate from the full campaign totals.
 
 ![Surviving mutation, added assertion, and detected defect](docs/images/mutation-recovery.png)
+
+_Recorded local assertion-improvement example from the same mutation release; separate from current CI counts._
 
 Inventory and pricing results are shown separately. Mutation titles describe the business defect, while expandable details retain technical IDs, source changes and actual failure evidence.
 
